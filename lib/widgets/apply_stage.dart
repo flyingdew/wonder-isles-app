@@ -1,0 +1,169 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
+import '../app_theme.dart';
+import '../data/character.dart';
+
+/// 应用挑战：三选一填空。
+///
+/// 题面来自 quiz.text，例如 "太{blank}出来了"；正确答案是 quiz.answer。
+/// 干扰项从其它已知字里挑，做成 3 个可点选按钮。
+class ApplyStage extends StatefulWidget {
+  const ApplyStage({super.key, required this.character, required this.onDone});
+  final WonderCharacter character;
+  final VoidCallback onDone;
+
+  @override
+  State<ApplyStage> createState() => _ApplyStageState();
+}
+
+class _ApplyStageState extends State<ApplyStage> {
+  late final List<String> _options;
+  String? _picked;
+
+  static const List<String> _distractPool = <String>[
+    '光', '云', '风', '花', '天', '地', '心', '手', '春', '秋',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final String correct = widget.character.quiz.answer;
+    final math.Random rng = math.Random(widget.character.id.hashCode);
+    final List<String> pool = _distractPool
+        .where((String s) => s != correct)
+        .toList()
+      ..shuffle(rng);
+    _options = <String>[correct, pool[0], pool[1]]..shuffle(rng);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final WonderCharacter c = widget.character;
+    final bool correct = _picked == c.quiz.answer;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        const Text('把正确的字填进去',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: InkPalette.inkSoft)),
+        const SizedBox(height: 20),
+        _ClozeText(text: c.quiz.text, filled: _picked),
+        const Spacer(),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 14,
+          runSpacing: 12,
+          children: <Widget>[
+            for (final String opt in _options)
+              _OptionTile(
+                text: opt,
+                state: _picked == null
+                    ? _OptionState.idle
+                    : opt == c.quiz.answer
+                        ? _OptionState.correct
+                        : opt == _picked
+                            ? _OptionState.wrong
+                            : _OptionState.idle,
+                onTap: _picked == null ? () => setState(() => _picked = opt) : null,
+              ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        FilledButton(
+          onPressed: correct ? widget.onDone : null,
+          child: const Text('点亮'),
+        ),
+        const SizedBox(height: 8),
+        if (_picked != null && !correct)
+          TextButton(
+            onPressed: () => setState(() => _picked = null),
+            child: const Text('再想想'),
+          ),
+      ],
+    );
+  }
+}
+
+enum _OptionState { idle, correct, wrong }
+
+class _OptionTile extends StatelessWidget {
+  const _OptionTile({required this.text, required this.state, required this.onTap});
+  final String text;
+  final _OptionState state;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color bg = switch (state) {
+      _OptionState.correct => InkPalette.glow,
+      _OptionState.wrong => InkPalette.vermilion.withOpacity(0.3),
+      _OptionState.idle => InkPalette.paperDeep,
+    };
+    return Material(
+      color: bg,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: InkPalette.ink.withOpacity(0.4)),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: SizedBox(
+          width: 78,
+          height: 78,
+          child: Center(
+            child: Text(text,
+                style: const TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w700,
+                  color: InkPalette.ink,
+                )),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ClozeText extends StatelessWidget {
+  const _ClozeText({required this.text, required this.filled});
+  final String text;
+  final String? filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> parts = text.split('{blank}');
+    return DefaultTextStyle.merge(
+      style: const TextStyle(
+        fontSize: 32,
+        fontWeight: FontWeight.w600,
+        color: InkPalette.ink,
+      ),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: <Widget>[
+          if (parts.isNotEmpty) Text(parts[0]),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+            decoration: BoxDecoration(
+              color: filled == null ? Colors.transparent : InkPalette.glow,
+              border: Border(
+                bottom: BorderSide(
+                  color: InkPalette.ink.withOpacity(0.6),
+                  width: 3,
+                ),
+              ),
+            ),
+            child: Text(filled ?? '　',
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+          ),
+          if (parts.length > 1) Text(parts[1]),
+        ],
+      ),
+    );
+  }
+}

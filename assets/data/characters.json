@@ -1,0 +1,182 @@
+[
+  {
+    "id": "ri",
+    "char": "日",
+    "pinyin": "rì",
+    "scene": "river",
+    "order": 1,
+    "story": "古人抬头看见太阳，画了一个圆圈，中间点一点，代表太阳的光。",
+    "quiz": { "type": "cloze", "text": "太{blank}出来了", "answer": "阳" }
+  },
+  {
+    "id": "yue",
+    "char": "月",
+    "pinyin": "yuè",
+    "scene": "river",
+    "order": 2,
+    "story": "月亮不像太阳那么圆，古人就画了一个弯弯的月牙。",
+    "quiz": { "type": "cloze", "text": "弯弯的{blank}亮", "answer": "月" }
+  },
+  {
+    "id": "shui",
+    "char": "水",
+    "pinyin": "shuǐ",
+    "scene": "river",
+    "order": 3,
+    "story": "弯弯曲曲的三条线，就是流动的水。",
+    "quiz": { "type": "cloze", "text": "河里的{blank}真清", "answer": "水" }
+  },
+  {
+    "id": "yu",
+    "char": "鱼",
+    "pinyin": "yú",
+    "scene": "river",
+    "order": 4,
+    "story": "尖尖的头，胖胖的身子，还有一条尾巴，就是一条鱼。",
+    "quiz": { "type": "cloze", "text": "小{blank}游啊游", "answer": "鱼" }
+  },
+  {
+    "id": "huo",
+    "char": "火",
+    "pinyin": "huǒ",
+    "scene": "river",
+    "order": 5,
+    "story": "三根跳动的火苗，像不像燃烧的样子？",
+    "quiz": { "type": "cloze", "text": "篝{blank}旁边真暖", "answer": "火" }
+  },
+  {
+    "id": "shan",
+    "char": "山",
+    "pinyin": "shān",
+    "scene": "forest",
+    "order": 6,
+    "story": "三座并排的山峰，中间高两边低。",
+    "quiz": { "type": "cloze", "text": "远处有一座{blank}", "answer": "山" }
+  },
+  {
+    "id": "mu_tree",
+    "char": "木",
+    "pinyin": "mù",
+    "scene": "forest",
+    "order": 7,
+    "story": "一棵树，有枝有干还有根。",
+    "quiz": { "type": "cloze", "text": "大{blank}下乘凉", "answer": "树" }
+  },
+  {
+    "id": "niao",
+    "char": "鸟",
+    "pinyin": "niǎo",
+    "scene": "forest",
+    "order": 8,
+    "story": "尖尖的嘴，长长的尾巴，会飞的就是鸟。",
+    "quiz": { "type": "cloze", "text": "树上有小{blank}", "answer": "鸟" }
+  },
+  {
+    "id": "yu_rain",
+    "char": "雨",
+    "pinyin": "yǔ",
+    "scene": "forest",
+    "order": 9,
+    "story": "天上一片云，下面点点是雨滴。",
+    "quiz": { "type": "cloze", "text": "下{blank}了，快回家", "answer": "雨" }
+  },
+  {
+    "id": "mu_eye",
+    "char": "目",
+    "pinyin": "mù",
+    "scene": "forest",
+    "order": 10,
+    "story": "一只眼睛，中间的黑点是眼珠。",
+    "quiz": { "type": "cloze", "text": "睁开双{blank}看看", "answer": "目" }
+  },
+  {
+    "id": "ren",
+    "char": "人",
+    "pinyin": "rén",
+    "scene": "village",
+    "order": 11,
+    "story": "一个站着的小人，有头有腿。",
+    "quiz": { "type": "cloze", "text": "屋里坐着一个{blank}", "answer": "人" }
+  },
+  {
+    "id": "kou",
+    "char": "口",
+    "pinyin": "kǒu",
+    "scene": "village",
+    "order": 12,
+    "story": "一张嘴巴，方方的。",
+    "quiz": { "type": "cloze", "text": "张开{blank}说话", "answer": "口" }
+  },
+  {
+    "id": "men",
+    "char": "门",
+    "pinyin": "mén",
+    "scene": "village",
+    "order": 13,
+    "story": "两扇门板，可以推开。",
+    "quiz": { "type": "cloze", "text": "推开{blank}进屋", "answer": "门" }
+  },
+  {
+    "id": "er",
+    "char": "耳",
+    "pinyin": "ěr",
+    "scene": "village",
+    "order": 14,
+    "story": "一只耳朵的形状，弯弯的。",
+    "quiz": { "type": "cloze", "text": "听声音用{blank}朵", "answer": "耳" }
+  },
+  {
+    "id": "shou",
+    "char": "手",
+    "pinyin": "shǒu",
+    "scene": "village",
+    "order": 15,
+    "story": "张开的五根手指。",
+    "quiz": { "type": "cloze", "text": "举起你的{blank}", "answer": "手" }
+  },
+  {
+    "id": "tian",
+    "char": "田",
+    "pinyin": "tián",
+    "scene": "field",
+    "order": 16,
+    "story": "一块被田埂分成四份的地。",
+    "quiz": { "type": "cloze", "text": "农民伯伯下{blank}了", "answer": "田" }
+  },
+  {
+    "id": "niu",
+    "char": "牛",
+    "pinyin": "niú",
+    "scene": "field",
+    "order": 17,
+    "story": "牛的头，有两只角。",
+    "quiz": { "type": "cloze", "text": "{blank}在田里耕地", "answer": "牛" }
+  },
+  {
+    "id": "yang",
+    "char": "羊",
+    "pinyin": "yáng",
+    "scene": "field",
+    "order": 18,
+    "story": "羊的角是弯弯的两撇。",
+    "quiz": { "type": "cloze", "text": "小{blank}咩咩叫", "answer": "羊" }
+  },
+  {
+    "id": "ma",
+    "char": "马",
+    "pinyin": "mǎ",
+    "scene": "field",
+    "order": 19,
+    "story": "长长的鬃毛和四条腿。",
+    "quiz": { "type": "cloze", "text": "骑上大白{blank}", "answer": "马" }
+  },
+  {
+    "id": "zu",
+    "char": "足",
+    "pinyin": "zú",
+    "scene": "field",
+    "order": 20,
+    "story": "一只脚，上面是腿，下面是脚掌。",
+    "quiz": { "type": "cloze", "text": "抬起你的{blank}", "answer": "足" }
+  }
+]

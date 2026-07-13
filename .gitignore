@@ -1,0 +1,32 @@
+# Flutter / Dart
+.dart_tool/
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# 平台目录尚未生成；等 `flutter create .` 补齐后再决定是否追踪：
+# android/
+# ios/
+# web/
+# windows/
+# macos/
+# linux/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+
+# System
+.DS_Store
+Thumbs.db
+
+# Local secrets
+*.keystore
+*.jks
+key.properties
+local.properties

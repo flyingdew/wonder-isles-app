@@ -1,0 +1,52 @@
+name: wonder_isles
+description: "奇思岛 · 字之岛 — 面向 6-8 岁孩子的汉字考古学习游戏 (Flutter 版)。"
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  audioplayers: ^6.1.0
+  shared_preferences: ^2.3.2
+  provider: ^6.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/data/characters.json
+    - assets/scenes/river.png
+    - assets/scenes/forest.png
+    - assets/scenes/village.png
+    - assets/scenes/field.png
+    - assets/scenes/palette.png
+    - assets/voice/
+    - assets/glyph/ri/
+    - assets/glyph/yue/
+    - assets/glyph/shui/
+    - assets/glyph/yu/
+    - assets/glyph/huo/
+    - assets/glyph/shan/
+    - assets/glyph/mu_tree/
+    - assets/glyph/niao/
+    - assets/glyph/yu_rain/
+    - assets/glyph/mu_eye/
+    - assets/glyph/ren/
+    - assets/glyph/kou/
+    - assets/glyph/men/
+    - assets/glyph/er/
+    - assets/glyph/shou/
+    - assets/glyph/tian/
+    - assets/glyph/niu/
+    - assets/glyph/yang/
+    - assets/glyph/ma/
+    - assets/glyph/zu/
