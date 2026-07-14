@@ -7,13 +7,31 @@ build/
 .flutter-plugins-dependencies
 .packages
 
-# 平台目录尚未生成；等 `flutter create .` 补齐后再决定是否追踪：
-# android/
-# ios/
-# web/
-# windows/
-# macos/
-# linux/
+# Android build artifacts
+android/.gradle/
+android/local.properties
+android/app/release/
+android/**/.cxx/
+android/**/gradle-app.setting
+android/captures/
+android/.settings/
+
+# iOS build artifacts
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/flutter_export_environment.sh
+ios/Pods/
+ios/.symlinks/
+ios/Runner.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Web
+web/main.dart.js*
+web/flutter_service_worker.js
+web/flutter_bootstrap.js
 
 # IDE
 .idea/
@@ -30,3 +48,7 @@ Thumbs.db
 *.jks
 key.properties
 local.properties
+
+# Build logs
+build.log
+android/.kotlin/

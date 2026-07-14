@@ -98,14 +98,14 @@ class _OptionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color bg = switch (state) {
       _OptionState.correct => InkPalette.glow,
-      _OptionState.wrong => InkPalette.vermilion.withOpacity(0.3),
+      _OptionState.wrong => InkPalette.vermilion.withValues(alpha: 0.3),
       _OptionState.idle => InkPalette.paperDeep,
     };
     return Material(
       color: bg,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: InkPalette.ink.withOpacity(0.4)),
+        side: BorderSide(color: InkPalette.ink.withValues(alpha: 0.4)),
       ),
       child: InkWell(
         onTap: onTap,
@@ -153,7 +153,7 @@ class _ClozeText extends StatelessWidget {
               color: filled == null ? Colors.transparent : InkPalette.glow,
               border: Border(
                 bottom: BorderSide(
-                  color: InkPalette.ink.withOpacity(0.6),
+                  color: InkPalette.ink.withValues(alpha: 0.6),
                   width: 3,
                 ),
               ),

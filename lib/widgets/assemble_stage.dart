@@ -46,7 +46,7 @@ class _AssembleStageState extends State<AssembleStage> {
       final int c = i % _cols;
       // 分布到画布四角
       final Offset origin = <Offset>[
-        Offset(12, 12),
+        const Offset(12, 12),
         Offset(s.width - pieceSide - 12, 12),
         Offset(12, s.height - pieceSide - 12),
         Offset(s.width - pieceSide - 12, s.height - pieceSide - 12),
@@ -105,9 +105,9 @@ class _AssembleStageState extends State<AssembleStage> {
                     rect: _targetRect,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: InkPalette.paper.withOpacity(0.6),
+                        color: InkPalette.paper.withValues(alpha: 0.6),
                         border: Border.all(
-                          color: InkPalette.ink.withOpacity(0.4),
+                          color: InkPalette.ink.withValues(alpha: 0.4),
                           width: 2,
                           style: BorderStyle.solid,
                         ),
@@ -210,16 +210,16 @@ class _PieceState extends State<_Piece> {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: widget.snapped
-                ? InkPalette.glow.withOpacity(0.4)
+                ? InkPalette.glow.withValues(alpha: 0.4)
                 : InkPalette.paper,
             border: Border.all(
-                color: InkPalette.ink.withOpacity(0.45), width: 1),
+                color: InkPalette.ink.withValues(alpha: 0.45), width: 1),
             borderRadius: BorderRadius.circular(6),
             boxShadow: widget.snapped
                 ? null
                 : <BoxShadow>[
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
+                      color: Colors.black.withValues(alpha: 0.15),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),

@@ -104,7 +104,7 @@ class _RevealProgress extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: InkPalette.paper.withOpacity(0.85),
+        color: InkPalette.paper.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text('${(ratio * 100).clamp(0, 100).toStringAsFixed(0)}%',

@@ -133,8 +133,8 @@ class _CharChip extends StatelessWidget {
       height: 34,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: lit ? InkPalette.glow.withOpacity(0.85) : Colors.white70,
-        border: Border.all(color: InkPalette.ink.withOpacity(0.35)),
+        color: lit ? InkPalette.glow.withValues(alpha: 0.85) : Colors.white70,
+        border: Border.all(color: InkPalette.ink.withValues(alpha: 0.35)),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(char,

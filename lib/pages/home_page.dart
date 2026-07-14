@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          _PaperBackdrop(),
+          const _PaperBackdrop(),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
@@ -142,9 +142,11 @@ class _LitBadge extends StatelessWidget {
 }
 
 class _PaperBackdrop extends StatelessWidget {
+  const _PaperBackdrop();
+
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    return const DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -155,7 +157,7 @@ class _PaperBackdrop extends StatelessWidget {
           ],
         ),
       ),
-      child: const SizedBox.expand(),
+      child: SizedBox.expand(),
     );
   }
 }

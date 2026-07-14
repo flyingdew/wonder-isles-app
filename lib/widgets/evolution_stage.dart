@@ -73,7 +73,7 @@ class _EvolutionStageState extends State<EvolutionStage> {
           decoration: BoxDecoration(
             color: InkPalette.paper,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: InkPalette.ink.withOpacity(0.15)),
+            border: Border.all(color: InkPalette.ink.withValues(alpha: 0.15)),
           ),
           child: Text(c.story,
               style: const TextStyle(

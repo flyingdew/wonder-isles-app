@@ -26,7 +26,7 @@ class ScenePage extends StatelessWidget {
         children: <Widget>[
           ColorFiltered(
             colorFilter: ColorFilter.mode(
-              InkPalette.paper.withOpacity(0.35),
+              InkPalette.paper.withValues(alpha: 0.35),
               BlendMode.lighten,
             ),
             child: Image.asset(scene.background, fit: BoxFit.cover),
@@ -45,7 +45,7 @@ class ScenePage extends StatelessWidget {
                         fontSize: 15,
                         shadows: <Shadow>[
                           Shadow(
-                            color: InkPalette.paper.withOpacity(0.8),
+                            color: InkPalette.paper.withValues(alpha: 0.8),
                             blurRadius: 6,
                           ),
                         ],
@@ -98,11 +98,11 @@ class _DigSpot extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: lit
-          ? InkPalette.glow.withOpacity(0.85)
-          : InkPalette.paperDeep.withOpacity(0.9),
+          ? InkPalette.glow.withValues(alpha: 0.85)
+          : InkPalette.paperDeep.withValues(alpha: 0.9),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: InkPalette.ink.withOpacity(0.25)),
+        side: BorderSide(color: InkPalette.ink.withValues(alpha: 0.25)),
       ),
       child: InkWell(
         onTap: onTap,
