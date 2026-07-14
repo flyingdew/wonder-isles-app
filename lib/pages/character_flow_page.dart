@@ -62,6 +62,7 @@ class _CharacterFlowPageState extends State<CharacterFlowPage> {
       case FlowStep.assemble:
         return AssembleStage(
           character: c,
+          gridSize: c.order <= 10 ? 2 : 3,
           onDone: () => setState(() => _step = FlowStep.evolve),
         );
       case FlowStep.evolve:
