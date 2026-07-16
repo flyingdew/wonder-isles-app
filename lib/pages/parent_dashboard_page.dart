@@ -9,6 +9,7 @@ import '../data/parent_tips.dart';
 import '../data/poems.dart';
 import '../services/progress_store.dart';
 import '../widgets/achievement_dialog.dart';
+import '../widgets/app_version.dart';
 import 'settings_page.dart';
 
 /// 家长视图：整章进度、最喜欢的字、共读建议、清空进度。
@@ -67,6 +68,8 @@ class ParentDashboardPage extends StatelessWidget {
           _ReadTogether(favorite: favorite),
           const SizedBox(height: 16),
           _AchievementWall(unlocked: progress.unlockedAchievements),
+          const SizedBox(height: 16),
+          const AboutCard(),
           const SizedBox(height: 24),
         ],
       ),
@@ -425,3 +428,4 @@ class _AchievementRow extends StatelessWidget {
     );
   }
 }
+

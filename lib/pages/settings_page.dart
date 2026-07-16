@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:package_info_plus/package_info_plus.dart';
-
 import '../app_theme.dart';
-import '../services/update_service.dart';
-import '../widgets/update_dialog.dart';
+import '../widgets/app_version.dart';
 import '../services/progress_store.dart';
 import '../services/voice_service.dart';
 
@@ -83,7 +80,7 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const _AboutPanel(),
+          const AboutCard(),
           const SizedBox(height: 24),
           const Center(
             child: Text(
@@ -222,111 +219,6 @@ class _Panel extends StatelessWidget {
               )),
           const SizedBox(height: 10),
           child,
-        ],
-      ),
-    );
-  }
-}
-
-
-class _AboutPanel extends StatefulWidget {
-  const _AboutPanel();
-
-  @override
-  State<_AboutPanel> createState() => _AboutPanelState();
-}
-
-class _AboutPanelState extends State<_AboutPanel> {
-  final UpdateService _service = UpdateService();
-  bool _busy = false;
-  String? _statusText;
-  String _version = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadVersion();
-  }
-
-  Future<void> _loadVersion() async {
-    try {
-      final PackageInfo info = await PackageInfo.fromPlatform();
-      if (!mounted) return;
-      setState(() {
-        _version = '${info.version}+${info.buildNumber}';
-      });
-    } catch (_) {
-      // 忽略：非移动端拿不到
-    }
-  }
-
-  Future<void> _handleCheckUpdate() async {
-    if (_busy) return;
-    setState(() {
-      _busy = true;
-      _statusText = '正在检查…';
-    });
-    // 手动检查：绕过 skipVersion，也允许 debug build 使用
-    final UpdateCheckResult result = await _service.check(ignoreSkipped: true);
-    if (!mounted) return;
-    setState(() => _busy = false);
-    switch (result.status) {
-      case UpdateCheckStatus.available:
-        setState(() => _statusText = '发现新版本 ${result.info!.tag}');
-        await showUpdateDialog(context, service: _service, result: result);
-        break;
-      case UpdateCheckStatus.upToDate:
-        setState(() => _statusText = '已是最新版本');
-        break;
-      case UpdateCheckStatus.skipped:
-        setState(() => _statusText = '新版本已被跳过：${result.info?.tag ?? ""}');
-        break;
-      case UpdateCheckStatus.networkFailure:
-        setState(() => _statusText = '检查失败：网络问题，稍后再试');
-        break;
-      case UpdateCheckStatus.malformed:
-        setState(() => _statusText = '检查失败：无法解析版本信息');
-        break;
-      case UpdateCheckStatus.disabled:
-        setState(() => _statusText = '当前平台不支持应用内更新');
-        break;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _Panel(
-      title: '关于',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          if (_version.isNotEmpty)
-            Text(
-              '版本 $_version',
-              style: const TextStyle(color: InkPalette.inkSoft, height: 1.5),
-            ),
-          if (_statusText != null) ...<Widget>[
-            const SizedBox(height: 8),
-            Text(
-              _statusText!,
-              style: const TextStyle(color: InkPalette.inkSoft, height: 1.5),
-            ),
-          ],
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: _busy ? null : _handleCheckUpdate,
-              icon: _busy
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.system_update_alt, size: 18),
-              label: Text(_busy ? '检查中…' : '检查更新'),
-            ),
-          ),
         ],
       ),
     );

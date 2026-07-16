@@ -11,6 +11,7 @@ import '../services/progress_store.dart';
 import '../services/voice_service.dart';
 import '../services/update_service.dart';
 import '../widgets/achievement_dialog.dart';
+import '../widgets/app_version.dart';
 import '../widgets/update_dialog.dart';
 import 'island_map_page.dart';
 import 'parent_dashboard_page.dart';
@@ -122,6 +123,9 @@ class _HomePageState extends State<HomePage> {
                             const _DebugShortcuts(),
                           ],
                           const SizedBox(height: 24),
+                          // 底部一行小字版本号，家长按需一眼看到，孩子基本忽略
+                          const Center(child: AppVersionLabel()),
+                          const SizedBox(height: 12),
                         ],
                       ),
                     ),
@@ -278,4 +282,5 @@ class _DebugChip extends StatelessWidget {
     );
   }
 }
+
 
