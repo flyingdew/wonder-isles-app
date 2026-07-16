@@ -160,3 +160,88 @@ Get-Content .vercel\project.json
 ```
 
 `.vercel/project.json` 里就是这两个 id（`orgId` / `projectId`）。`.vercel/` 目录已被 `.gitignore` 忽略，不会入库。
+
+## CI/CD：Android APK Release
+
+Android release APK 通过 `.github/workflows/release-android.yml` 自动构建并（可选）发到 GitHub Releases。
+
+### 触发方式
+
+1. **打 tag**（推荐）：本地 `git tag v0.1.1 && git push origin v0.1.1`，CI 自动构建并以该 tag 建 Release。
+2. **手动**：Actions 页面 → *Build Android APK & Release* → **Run workflow**。
+   - `version_tag` 留空 → 只构建 APK，作为 workflow artifact 保留 30 天，不发 Release；
+   - 填入 `vX.Y.Z` → 构建完自动发 Release；
+   - `prerelease` 选 `true` 会打 pre-release 标签。
+
+### 产物命名
+
+- `wonder-isles-<tag>-universal.apk` — 通用包
+- `wonder-isles-<tag>-arm64-v8a.apk` — 主流真机（推荐）
+- `wonder-isles-<tag>-armeabi-v7a.apk` — 老 ARM
+- `wonder-isles-<tag>-x86_64.apk` — 模拟器 / 少数 x86 设备
+
+### 正式签名（可选）
+
+不配任何 secret 时，CI 会沿用 Flutter 脚手架的 debug keystore 签名（`android/app/build.gradle.kts` 里的默认行为），可以直接装但**不适合上应用商店**。要用正式 keystore：
+
+1. 本地生成一次 keystore（只做一次，别丢）：
+
+   ```powershell
+   keytool -genkey -v -keystore wonder-isles-upload.jks `
+     -keyalg RSA -keysize 2048 -validity 10000 `
+     -alias wonder-isles
+   ```
+
+2. 生成 base64 内容（Windows PowerShell）：
+
+   ```powershell
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("wonder-isles-upload.jks")) `
+     | Set-Clipboard
+   ```
+
+3. 到仓库 Settings → Secrets and variables → Actions 添加：
+
+   | Secret | 说明 |
+   | --- | --- |
+   | `ANDROID_KEYSTORE_BASE64` | 上一步剪贴板里的 base64 字符串 |
+   | `ANDROID_KEYSTORE_PASSWORD` | keystore 密码 |
+   | `ANDROID_KEY_ALIAS` | 上面 `-alias` 的值（示例：`wonder-isles`） |
+   | `ANDROID_KEY_PASSWORD` | key 密码（一般与 keystore 密码相同） |
+
+4. 让 `android/app/build.gradle.kts` 读取 `android/key.properties`（工作流会在 CI 里生成这个文件）：
+
+   ```kotlin
+   import java.util.Properties
+   import java.io.FileInputStream
+
+   val keystorePropertiesFile = rootProject.file("key.properties")
+   val keystoreProperties = Properties().apply {
+       if (keystorePropertiesFile.exists()) {
+           load(FileInputStream(keystorePropertiesFile))
+       }
+   }
+
+   android {
+       // ...
+       signingConfigs {
+           create("release") {
+               if (keystorePropertiesFile.exists()) {
+                   keyAlias      = keystoreProperties["keyAlias"] as String
+                   keyPassword   = keystoreProperties["keyPassword"] as String
+                   storeFile     = file(keystoreProperties["storeFile"] as String)
+                   storePassword = keystoreProperties["storePassword"] as String
+               }
+           }
+       }
+       buildTypes {
+           release {
+               signingConfig = if (keystorePropertiesFile.exists())
+                   signingConfigs.getByName("release")
+               else
+                   signingConfigs.getByName("debug")
+           }
+       }
+   }
+   ```
+
+   `android/key.properties` 已被忽略，不会入库。keystore 本体（`*.jks` / `*.keystore`）也在 `.gitignore` 里，务必单独备份，一旦丢失就无法向已发布的 APK 做增量升级。
