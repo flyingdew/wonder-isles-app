@@ -19,7 +19,7 @@
 - [x] `pubspec.yaml`、`analysis_options.yaml`、`.gitignore`
 - [x] `lib/` 骨架：主题、字库模型/加载、存档、TTS 服务、四步页面
 - [x] 资产复用：字库 JSON / 字形 PNG / TTS mp3 / 场景背景
-- [ ] 装 Flutter SDK 后 `flutter create .` 生成平台目录，跑通 `flutter run`
+- [x] 装 Flutter SDK 后 `flutter create .` 生成平台目录，跑通 `flutter run`
 
 ## W1 · 单字闭环打磨
 
@@ -47,10 +47,10 @@
 
 ## W4 · 多端出包
 
-- [ ] Android APK：`flutter build apk --release`，华为/小米/OPPO 各一台真机测
+- [x] Android APK：`flutter build apk --release` 已跑通，产物 `build/app/outputs/flutter-apk/app-release.apk`，真机分发测试待安排
 - [ ] iOS TestFlight：`flutter build ipa`，需苹果开发者账号
-- [ ] Web H5：`flutter build web`，部署到 Vercel/Netlify 或自有 CDN
-- [ ] 屏幕适配：竖屏为主，兼顾平板横屏；`MediaQuery` + `LayoutBuilder` 自适应
+- [x] Web H5：`flutter build web --release` 已跑通，产物 `build/web`，部署到 Vercel/Netlify 或自有 CDN 待安排
+- [x] 屏幕适配：全局锁竖屏，首页 LayoutBuilder 自适应窄屏；四步 stage 与列表页均已用 LayoutBuilder / GridView / ListView
 
 ## W5 · 内测与调优
 

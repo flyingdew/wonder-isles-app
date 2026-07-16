@@ -42,62 +42,76 @@ class _HomePageState extends State<HomePage> {
         children: <Widget>[
           const _PaperBackdrop(),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text(
-                    '奇思岛',
-                    style: TextStyle(
-                      fontSize: 44,
-                      fontWeight: FontWeight.w700,
-                      color: InkPalette.ink,
-                      letterSpacing: 4,
+            child: LayoutBuilder(builder: (BuildContext ctx, BoxConstraints cons) {
+              final double titleSize = cons.maxWidth < 340 ? 36 : 44;
+              final bool tight = cons.maxHeight < 640;
+              final double vPad = tight ? 24 : 40;
+              return SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: cons.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 28, vertical: vPad),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            '奇思岛',
+                            style: TextStyle(
+                              fontSize: titleSize,
+                              fontWeight: FontWeight.w700,
+                              color: InkPalette.ink,
+                              letterSpacing: 4,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            '第一章 · 字之岛 · 万物有形',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: InkPalette.inkSoft,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          SizedBox(height: tight ? 24 : 0),
+                          if (!tight) const Spacer(),
+                          _LitBadge(count: progress.litCount),
+                          SizedBox(height: tight ? 14 : 20),
+                          Row(
+                            children: <Widget>[
+                              FilledButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(MaterialPageRoute<void>(
+                                    builder: (_) => const IslandMapPage(),
+                                  ));
+                                },
+                                child: const Text('登岛探字'),
+                              ),
+                              const SizedBox(width: 12),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                                  builder: (_) => const ParentDashboardPage(),
+                                )),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: InkPalette.inkSoft,
+                                ),
+                                child: const Text('家长'),
+                              ),
+                            ],
+                          ),
+                          if (kDebugMode && kIsWeb) ...<Widget>[
+                            const SizedBox(height: 12),
+                            const _DebugShortcuts(),
+                          ],
+                          const SizedBox(height: 24),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    '第一章 · 字之岛 · 万物有形',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: InkPalette.inkSoft,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const Spacer(),
-                  _LitBadge(count: progress.litCount),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: <Widget>[
-                      FilledButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute<void>(
-                            builder: (_) => const IslandMapPage(),
-                          ));
-                        },
-                        child: const Text('登岛探字'),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                          builder: (_) => const ParentDashboardPage(),
-                        )),
-                        style: TextButton.styleFrom(
-                          foregroundColor: InkPalette.inkSoft,
-                        ),
-                        child: const Text('家长'),
-                      ),
-                    ],
-                  ),
-                  if (kDebugMode && kIsWeb) ...<Widget>[
-                    const SizedBox(height: 12),
-                    const _DebugShortcuts(),
-                  ],
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
+                ),
+              );
+            }),
           ),
         ],
       ),

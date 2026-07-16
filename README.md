@@ -72,12 +72,11 @@ Get-Process dart, dartaotruntime -ErrorAction SilentlyContinue | Stop-Process -F
 
 ## 快速开始（有 Flutter SDK）
 
-目前 `lib/` 与 `assets/` 是手工写好的，平台目录还没建，第一次拉下来要跑一下：
+平台目录 `android/` `ios/` `web/` 已生成并入库，第一次拉下来只需装依赖：
 
 ```powershell
 cd wonder-isles-app
 flutter --version               # 需要 Flutter 3.22+ / Dart 3.4+
-flutter create .                # 生成 android/ ios/ web/ 等平台目录
 flutter pub get
 flutter run                     # 默认设备；-d chrome / -d windows 也行
 ```
@@ -100,11 +99,39 @@ flutter run                     # 默认设备；-d chrome / -d windows 也行
 - **替换**：引擎从 Cocos Creator 换到 Flutter，核心循环用原生 Widget 重写。
 - **保留**：产品定位、四步循环、家长端极简策略、里程碑节奏都不变。
 
+## 出包
+
+Android release APK:
+
+```powershell
+$env:JAVA_HOME="C:\Program Files\Java\jdk-17"
+$env:ANDROID_SDK_ROOT="D:\Android\android-sdk"
+cd E:\demo\wonder-isles\wonder-isles-app
+flutter build apk --release
+```
+
+产物：`build\app\outputs\flutter-apk\app-release.apk`（当前约 53 MB，含 CC0
+音频与 80 张字形 PNG）。Gradle 会在 pub-cache 跨盘时抛 Kotlin 增量缓存红字，属
+audioplayers_android 5.2.1 已知问题，不影响产物。
+
+Web release:
+
+```powershell
+cd E:\demo\wonder-isles\wonder-isles-app
+flutter build web --release
+```
+
+产物：`build\web\`（canvaskit 版，约 39 MB）。整个目录静态托管即可，
+`index.html` 是入口。本地验证可以用 `python -m http.server` 或
+`npx serve build/web`。
+
+iOS TestFlight 需要苹果开发者账号 + macOS 打包，还没验证。
+
 ## 里程碑
 
-- **W1**（本周）：单字闭环跑通，主菜单 / 岛屿地图 / 河岸 5 字全部可玩。✅ 骨架已完成，需装 SDK 后跑一次 `flutter run` 验证。
-- **W2**：4 场景 × 20 字全部接入 + 场景小诗 + 家长视图。
-- **W3**：Boss 关（20 字组诗）+ 音效 BGM + 屏幕适配。
-- **W4**：Android APK / iOS TestFlight / Web H5 三端出包。
+- **W1**：单字闭环 ✅
+- **W2**：4 场景 × 20 字 + 场景小诗 + Boss 长诗 ✅
+- **W3**：家长视图 + 设置（TTS/BGM/SFX 三通道）+ 成就系统 + 音频接入 ✅
+- **W4**：Android APK ✅ / Web H5 ✅ / iOS TestFlight ⏳
 
-详见 [docs/roadmap.md](docs/roadmap.md)。
+详见 [docs/roadmap.md](docs/roadmap.md).
