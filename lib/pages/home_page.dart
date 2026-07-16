@@ -6,6 +6,7 @@ import '../app_theme.dart';
 import '../services/progress_store.dart';
 import '../data/poems.dart';
 import 'island_map_page.dart';
+import 'parent_dashboard_page.dart';
 import 'poem_stage_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -58,7 +59,9 @@ class HomePage extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       TextButton(
-                        onPressed: () => _showParentSheet(context, progress),
+                        onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                          builder: (_) => const ParentDashboardPage(),
+                        )),
                         style: TextButton.styleFrom(
                           foregroundColor: InkPalette.inkSoft,
                         ),
@@ -80,43 +83,6 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  void _showParentSheet(BuildContext context, ProgressStore progress) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: InkPalette.paper,
-      builder: (BuildContext ctx) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const Text('家长视图',
-                  style: TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 12),
-              Text('本章已点亮：${progress.litCount} / 20 字',
-                  style: const TextStyle(color: InkPalette.inkSoft)),
-              const SizedBox(height: 8),
-              const Text('v1 极简，仅显示当前进度；后续会加入回访最多的字与共读建议。',
-                  style: TextStyle(color: InkPalette.inkSoft)),
-              const SizedBox(height: 20),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () async {
-                    await progress.reset();
-                    if (ctx.mounted) Navigator.of(ctx).pop();
-                  },
-                  child: const Text('清空进度'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }
 
 class _LitBadge extends StatelessWidget {

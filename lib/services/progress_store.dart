@@ -36,6 +36,7 @@ class ProgressStore extends ChangeNotifier {
 
   bool isLit(String id) => _lit.contains(id);
   int visits(String id) => _visits[id] ?? 0;
+  Map<String, int> get allVisits => Map<String, int>.unmodifiable(_visits);
   bool isPoemDone(String sceneKey) => _poems.contains(sceneKey);
 
   Future<void> markLit(String id) async {
