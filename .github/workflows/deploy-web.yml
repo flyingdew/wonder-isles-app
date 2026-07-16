@@ -31,7 +31,7 @@ jobs:
     name: Build Flutter Web & Deploy
     runs-on: ubuntu-latest
     env:
-      FLUTTER_VERSION: "3.22.3"
+      FLUTTER_VERSION: "3.29.3"
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       # 手动触发时按输入决定；push 到 main 一律视为生产部署
@@ -62,7 +62,6 @@ jobs:
         run: |
           flutter build web \
             --release \
-            --web-renderer canvaskit \
             --base-href "/" \
             --dart-define=BUILD_SHA=${GITHUB_SHA::7}
 
@@ -106,3 +105,4 @@ jobs:
             echo "- Commit：\`${GITHUB_SHA::7}\`"
             echo "- URL：${{ steps.deploy.outputs.url }}"
           } >> "$GITHUB_STEP_SUMMARY"
+
