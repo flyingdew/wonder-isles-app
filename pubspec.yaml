@@ -15,6 +15,15 @@ dependencies:
   provider: ^6.1.2
   audioplayers: ^6.1.0
 
+  # 自动更新（仅 Android release 生效）
+  package_info_plus: ^8.0.0
+  http: ^1.2.0
+  dio: ^5.7.0
+  path_provider: ^2.1.4
+  open_filex: ^4.5.0
+  permission_handler: ^11.3.1
+  device_info_plus: ^11.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -48,3 +57,4 @@ flutter:
     - assets/glyph/yang/
     - assets/glyph/ma/
     - assets/glyph/zu/
+

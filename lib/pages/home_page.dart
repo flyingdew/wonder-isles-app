@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +9,9 @@ import '../data/achievement.dart';
 import '../data/poems.dart';
 import '../services/progress_store.dart';
 import '../services/voice_service.dart';
+import '../services/update_service.dart';
 import '../widgets/achievement_dialog.dart';
+import '../widgets/update_dialog.dart';
 import 'island_map_page.dart';
 import 'parent_dashboard_page.dart';
 import 'poem_stage_page.dart';
@@ -30,7 +34,20 @@ class _HomePageState extends State<HomePage> {
           await context.read<ProgressStore>().recordDailyVisit();
       if (!mounted) return;
       await showAchievementUnlocked(context, unlocked);
+      // 首页稳定 3 秒后再静默检查一次更新，避免影响冷启动 & 成就弹窗
+      unawaited(_maybePromptUpdate());
     });
+  }
+
+  Future<void> _maybePromptUpdate() async {
+    await Future<void>.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+    final UpdateService service = UpdateService();
+    final UpdateCheckResult result = await service.check();
+    if (!mounted) return;
+    if (result.status == UpdateCheckStatus.available) {
+      await showUpdateDialog(context, service: service, result: result);
+    }
   }
 
   @override
@@ -261,3 +278,4 @@ class _DebugChip extends StatelessWidget {
     );
   }
 }
+
