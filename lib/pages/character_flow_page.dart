@@ -76,7 +76,7 @@ class _CharacterFlowPageState extends State<CharacterFlowPage> {
           onDone: _onFinish,
         );
       case FlowStep.done:
-        return _CelebrationView(character: c, onExit: () => Navigator.of(context).pop());
+        return _CelebrationView(character: c, onExit: () => Navigator.of(context).pop<String>(c.id));
     }
   }
 

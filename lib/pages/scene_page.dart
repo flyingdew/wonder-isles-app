@@ -9,22 +9,56 @@ import 'character_flow_page.dart';
 import 'poem_stage_page.dart';
 
 /// 一个场景（河岸/山林/…）里的 5 个字入口。
-class ScenePage extends StatelessWidget {
+/// 从单字四步返回时若字被点亮，会给对应格子放一次"从灰变亮"的仪式感动画。
+class ScenePage extends StatefulWidget {
   const ScenePage({super.key, required this.scene});
   final SceneId scene;
+
+  @override
+  State<ScenePage> createState() => _ScenePageState();
+}
+
+class _ScenePageState extends State<ScenePage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _litCtrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  );
+  String? _justLitId;
+
+  @override
+  void dispose() {
+    _litCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openCharacter(BuildContext context, WonderCharacter c) async {
+    final String? litId = await Navigator.of(context).push<String>(
+      MaterialPageRoute<String>(
+        builder: (_) => CharacterFlowPage(character: c),
+      ),
+    );
+    if (!mounted || litId == null) return;
+    setState(() => _justLitId = litId);
+    _litCtrl.forward(from: 0).whenComplete(() {
+      if (!mounted) return;
+      setState(() => _justLitId = null);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final CharacterRepository repo = context.read<CharacterRepository>();
     final ProgressStore progress = context.watch<ProgressStore>();
-    final List<WonderCharacter> chars = repo.forScene(scene);
-    final int lit = chars.where((WonderCharacter c) => progress.isLit(c.id)).length;
+    final List<WonderCharacter> chars = repo.forScene(widget.scene);
+    final int lit =
+        chars.where((WonderCharacter c) => progress.isLit(c.id)).length;
     final bool allLit = lit == chars.length;
-    final bool poemDone = progress.isPoemDone(scene.key);
+    final bool poemDone = progress.isPoemDone(widget.scene.key);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(title: Text(scene.label)),
+      appBar: AppBar(title: Text(widget.scene.label)),
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
@@ -33,7 +67,7 @@ class ScenePage extends StatelessWidget {
               InkPalette.paper.withValues(alpha: poemDone ? 0.15 : 0.35),
               BlendMode.lighten,
             ),
-            child: Image.asset(scene.background, fit: BoxFit.cover),
+            child: Image.asset(widget.scene.background, fit: BoxFit.cover),
           ),
           SafeArea(
             child: Padding(
@@ -70,13 +104,9 @@ class ScenePage extends StatelessWidget {
                           _DigSpot(
                             character: c,
                             lit: progress.isLit(c.id),
-                            onTap: () {
-                              Navigator.of(context)
-                                  .push(MaterialPageRoute<void>(
-                                builder: (_) =>
-                                    CharacterFlowPage(character: c),
-                              ));
-                            },
+                            justLit: _justLitId == c.id,
+                            reveal: _litCtrl,
+                            onTap: () => _openCharacter(context, c),
                           ),
                       ],
                     ),
@@ -87,7 +117,8 @@ class ScenePage extends StatelessWidget {
                     poemDone: poemDone,
                     onEnter: () {
                       Navigator.of(context).push(MaterialPageRoute<void>(
-                        builder: (_) => PoemStagePage.forScene(scene: scene),
+                        builder: (_) =>
+                            PoemStagePage.forScene(scene: widget.scene),
                       ));
                     },
                   ),
@@ -161,53 +192,118 @@ class _DigSpot extends StatelessWidget {
   const _DigSpot({
     required this.character,
     required this.lit,
+    required this.justLit,
+    required this.reveal,
     required this.onTap,
   });
 
   final WonderCharacter character;
   final bool lit;
+  final bool justLit;
+  final Animation<double> reveal;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: lit
-          ? InkPalette.glow.withValues(alpha: 0.85)
-          : InkPalette.paperDeep.withValues(alpha: 0.9),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: InkPalette.ink.withValues(alpha: 0.25)),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              lit
-                  ? Text(character.char,
+    return AnimatedBuilder(
+      animation: reveal,
+      builder: (BuildContext ctx, Widget? _) {
+        // t=0 前是灰暗土堆；仅在 justLit 时把 0 → 1 播一遍。
+        final double t = justLit ? Curves.easeOutBack.transform(reveal.value.clamp(0.0, 1.0)) : (lit ? 1.0 : 0.0);
+        final Color bg = Color.lerp(
+          InkPalette.paperDeep.withValues(alpha: 0.9),
+          InkPalette.glow.withValues(alpha: 0.9),
+          t.clamp(0.0, 1.0),
+        )!;
+        final double scale = 1 + (justLit ? 0.08 * (1 - (t - 0.5).abs() * 2).clamp(0.0, 1.0) : 0);
+        return Transform.scale(
+          scale: scale,
+          child: Material(
+            color: bg,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: justLit
+                    ? Color.lerp(InkPalette.ochre, InkPalette.ink,
+                            t.clamp(0.0, 1.0))!
+                        .withValues(alpha: 0.6)
+                    : InkPalette.ink.withValues(alpha: 0.25),
+                width: justLit ? 2 : 1,
+              ),
+            ),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    _GlyphOrMound(
+                      char: character.char,
+                      lit: lit,
+                      reveal: justLit ? t : (lit ? 1.0 : 0.0),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      lit ? character.pinyin : '土堆',
                       style: const TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w700,
-                        color: InkPalette.ink,
-                      ))
-                  : const Icon(Icons.landscape_outlined,
-                      size: 36, color: InkPalette.inkSoft),
-              const SizedBox(height: 6),
-              Text(
-                lit ? character.pinyin : '土堆',
-                style: const TextStyle(
-                  color: InkPalette.inkSoft,
-                  fontSize: 13,
+                        color: InkPalette.inkSoft,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
+class _GlyphOrMound extends StatelessWidget {
+  const _GlyphOrMound({
+    required this.char,
+    required this.lit,
+    required this.reveal,
+  });
+  final String char;
+  final bool lit;
+  final double reveal;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!lit && reveal <= 0) {
+      return const Icon(Icons.landscape_outlined,
+          size: 36, color: InkPalette.inkSoft);
+    }
+    // reveal 从 0 到 1：土堆图标淡出，字形淡入并轻微放大。
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        if (reveal < 1)
+          Opacity(
+            opacity: 1 - reveal,
+            child: const Icon(Icons.landscape_outlined,
+                size: 36, color: InkPalette.inkSoft),
+          ),
+        Opacity(
+          opacity: reveal,
+          child: Transform.scale(
+            scale: 0.85 + 0.15 * reveal,
+            child: Text(
+              char,
+              style: const TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.w700,
+                color: InkPalette.ink,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

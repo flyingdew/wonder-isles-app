@@ -1,14 +1,17 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../app_theme.dart';
 import '../data/character.dart';
+import '../data/character_repository.dart';
 
 /// 应用挑战：三选一填空。
 ///
 /// 题面来自 quiz.text，例如 "太{blank}出来了"；正确答案是 quiz.answer。
-/// 干扰项从其它已知字里挑，做成 3 个可点选按钮。
+/// 干扰项优先从当前字所在场景的其它字里挑（"离得近"），不足时兜底用全字库。
+/// 极少数题目的 answer 本身不在字库中（如 "阳"、"树"），此时同场景其它字仍然是最佳干扰。
 class ApplyStage extends StatefulWidget {
   const ApplyStage({super.key, required this.character, required this.onDone});
   final WonderCharacter character;
@@ -22,20 +25,34 @@ class _ApplyStageState extends State<ApplyStage> {
   late final List<String> _options;
   String? _picked;
 
-  static const List<String> _distractPool = <String>[
-    '光', '云', '风', '花', '天', '地', '心', '手', '春', '秋',
-  ];
-
   @override
   void initState() {
     super.initState();
     final String correct = widget.character.quiz.answer;
+    final CharacterRepository repo = context.read<CharacterRepository>();
     final math.Random rng = math.Random(widget.character.id.hashCode);
-    final List<String> pool = _distractPool
-        .where((String s) => s != correct)
+
+    final List<String> sameScene = repo
+        .forScene(widget.character.scene)
+        .where((WonderCharacter c) =>
+            c.id != widget.character.id && c.char != correct)
+        .map((WonderCharacter c) => c.char)
         .toList()
       ..shuffle(rng);
-    _options = <String>[correct, pool[0], pool[1]]..shuffle(rng);
+
+    final List<String> otherScenes = repo.all
+        .where((WonderCharacter c) =>
+            c.scene != widget.character.scene && c.char != correct)
+        .map((WonderCharacter c) => c.char)
+        .toList()
+      ..shuffle(rng);
+
+    final List<String> distractors = <String>[
+      ...sameScene,
+      ...otherScenes,
+    ].where((String s) => s != correct).toList();
+
+    _options = <String>[correct, distractors[0], distractors[1]]..shuffle(rng);
   }
 
   @override
@@ -66,7 +83,9 @@ class _ApplyStageState extends State<ApplyStage> {
                         : opt == _picked
                             ? _OptionState.wrong
                             : _OptionState.idle,
-                onTap: _picked == null ? () => setState(() => _picked = opt) : null,
+                onTap: _picked == null
+                    ? () => setState(() => _picked = opt)
+                    : null,
               ),
           ],
         ),
