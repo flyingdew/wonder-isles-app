@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../app_theme.dart';
+import '../services/error_reporter.dart';
 import '../services/update_service.dart';
 import 'update_dialog.dart';
 
@@ -133,6 +134,17 @@ class _AboutCardState extends State<AboutCard> {
     }
   }
 
+  Future<void> _handleSentryTest() async {
+    await ErrorReporter.triggerTestException();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('已发送一条测试异常到 Sentry'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -168,22 +180,33 @@ class _AboutCardState extends State<AboutCard> {
             ),
           ],
           const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: _busy ? null : _handleCheck,
-              icon: _busy
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.system_update_alt, size: 18),
-              label: Text(_busy ? '检查中…' : '检查更新'),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              if (ErrorReporter.enabled)
+                TextButton.icon(
+                  onPressed: _busy ? null : _handleSentryTest,
+                  icon: const Icon(Icons.bug_report_outlined, size: 18),
+                  label: const Text('上报测试'),
+                  style: TextButton.styleFrom(
+                      foregroundColor: InkPalette.inkSoft),
+                ),
+              TextButton.icon(
+                onPressed: _busy ? null : _handleCheck,
+                icon: _busy
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.system_update_alt, size: 18),
+                label: Text(_busy ? '检查中…' : '检查更新'),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 }
+

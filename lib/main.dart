@@ -6,10 +6,19 @@ import 'app_theme.dart';
 import 'data/character_repository.dart';
 import 'pages/home_page.dart';
 import 'services/progress_store.dart';
+import 'services/error_reporter.dart';
 import 'services/voice_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Sentry 包住整个 runApp：release + 配置了 SENTRY_DSN 时启用，
+  // 其它情况下 guard() 内是 no-op，行为完全透明。
+  await ErrorReporter.guard(() async {
+    await _bootstrap();
+  });
+}
+
+Future<void> _bootstrap() async {
   await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
     DeviceOrientation.portraitUp,
   ]);
@@ -72,3 +81,4 @@ class WonderIslesApp extends StatelessWidget {
     );
   }
 }
+

@@ -97,14 +97,20 @@ jobs:
           echo "🏷️  Version tag: ${TAG}"
 
       - name: Build APK (release, split-per-abi + universal)
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           flutter build apk \
             --release \
             --split-per-abi \
-            --dart-define=BUILD_SHA=${GITHUB_SHA::7}
+            --dart-define=BUILD_SHA=${GITHUB_SHA::7} \
+            --dart-define=SENTRY_DSN="${SENTRY_DSN}" \
+            --dart-define=SENTRY_ENVIRONMENT=production
           flutter build apk \
             --release \
-            --dart-define=BUILD_SHA=${GITHUB_SHA::7}
+            --dart-define=BUILD_SHA=${GITHUB_SHA::7} \
+            --dart-define=SENTRY_DSN="${SENTRY_DSN}" \
+            --dart-define=SENTRY_ENVIRONMENT=production
 
       - name: Rename APK outputs
         id: rename
@@ -175,3 +181,4 @@ jobs:
               echo "- \`$(basename "$f")\` — ${size}"
             done
           } >> "$GITHUB_STEP_SUMMARY"
+

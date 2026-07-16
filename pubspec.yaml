@@ -1,7 +1,7 @@
 name: wonder_isles
 description: "奇思岛 · 字之岛 — 面向 6-8 岁孩子的汉字考古学习游戏 (Flutter 版)。"
 publish_to: "none"
-version: 0.1.7+7
+version: 0.1.8+8
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -23,6 +23,9 @@ dependencies:
   open_filex: ^4.5.0
   permission_handler: ^11.3.1
   device_info_plus: ^11.0.0
+
+  # 错误 / 崩溃收集（DSN 通过 --dart-define=SENTRY_DSN=xxx 注入，未配则自动跳过）
+  sentry_flutter: ^8.9.0
 
 dev_dependencies:
   flutter_test:
@@ -57,6 +60,7 @@ flutter:
     - assets/glyph/yang/
     - assets/glyph/ma/
     - assets/glyph/zu/
+
 
 
 

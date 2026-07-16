@@ -57,11 +57,15 @@ jobs:
         continue-on-error: true
 
       - name: Build Web (release, canvaskit)
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           flutter build web \
             --release \
             --base-href "/" \
-            --dart-define=BUILD_SHA=${GITHUB_SHA::7}
+            --dart-define=BUILD_SHA=${GITHUB_SHA::7} \
+            --dart-define=SENTRY_DSN="${SENTRY_DSN}" \
+            --dart-define=SENTRY_ENVIRONMENT=production
 
       - name: Copy vercel.json into build output
         run: |
@@ -103,6 +107,7 @@ jobs:
             echo "- Commit：\`${GITHUB_SHA::7}\`"
             echo "- URL：${{ steps.deploy.outputs.url }}"
           } >> "$GITHUB_STEP_SUMMARY"
+
 
 
 
