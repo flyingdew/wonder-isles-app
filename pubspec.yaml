@@ -26,6 +26,8 @@ flutter:
     - assets/data/characters.json
     - assets/scenes/
     - assets/voice/
+    - assets/bgm/
+    - assets/sfx/
     - assets/glyph/ri/
     - assets/glyph/yue/
     - assets/glyph/shui/

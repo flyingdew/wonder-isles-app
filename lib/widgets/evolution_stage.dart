@@ -49,6 +49,7 @@ class _EvolutionStageState extends State<EvolutionStage> {
         t.cancel();
         return;
       }
+      context.read<VoiceService>().playSfx('chime');
       setState(() => _revealed += 1);
     });
   }

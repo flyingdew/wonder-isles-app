@@ -5,6 +5,7 @@ import '../app_theme.dart';
 import '../data/character.dart';
 import '../data/character_repository.dart';
 import '../services/progress_store.dart';
+import '../services/voice_service.dart';
 import 'character_flow_page.dart';
 import 'poem_stage_page.dart';
 
@@ -25,6 +26,15 @@ class _ScenePageState extends State<ScenePage>
     duration: const Duration(milliseconds: 1400),
   );
   String? _justLitId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<VoiceService>().playBgmForScene(widget.scene.key);
+    });
+  }
 
   @override
   void dispose() {

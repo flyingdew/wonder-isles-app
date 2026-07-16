@@ -7,11 +7,26 @@ import '../data/character.dart';
 import '../data/character_repository.dart';
 import '../data/poems.dart';
 import '../services/progress_store.dart';
+import '../services/voice_service.dart';
 import 'poem_stage_page.dart';
 import 'scene_page.dart';
 
-class IslandMapPage extends StatelessWidget {
+class IslandMapPage extends StatefulWidget {
   const IslandMapPage({super.key});
+
+  @override
+  State<IslandMapPage> createState() => _IslandMapPageState();
+}
+
+class _IslandMapPageState extends State<IslandMapPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<VoiceService>().stopBgm();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

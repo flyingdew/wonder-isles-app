@@ -4,9 +4,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:provider/provider.dart';
 
 import '../app_theme.dart';
 import '../data/character.dart';
+import '../services/voice_service.dart';
 
 /// 勘探：用手指刷开泥土，露出下方的甲骨文字形。
 ///
@@ -155,6 +157,7 @@ class _DigStageState extends State<DigStage> {
     });
     if (!_finished && _revealedRatio >= _revealTargetRatio) {
       _finished = true;
+      context.read<VoiceService>().playSfx('sparkle');
       Future<void>.delayed(const Duration(milliseconds: 250), widget.onDone);
     }
   }

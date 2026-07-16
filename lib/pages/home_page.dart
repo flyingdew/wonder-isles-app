@@ -6,6 +6,7 @@ import '../app_theme.dart';
 import '../data/achievement.dart';
 import '../data/poems.dart';
 import '../services/progress_store.dart';
+import '../services/voice_service.dart';
 import '../widgets/achievement_dialog.dart';
 import 'island_map_page.dart';
 import 'parent_dashboard_page.dart';
@@ -24,6 +25,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      context.read<VoiceService>().stopBgm();
       final List<Achievement> unlocked =
           await context.read<ProgressStore>().recordDailyVisit();
       if (!mounted) return;

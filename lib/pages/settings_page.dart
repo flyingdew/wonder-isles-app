@@ -5,7 +5,7 @@ import '../app_theme.dart';
 import '../services/progress_store.dart';
 import '../services/voice_service.dart';
 
-/// 设置：语音开关、音量、清空进度。
+/// 设置：TTS / BGM / SFX 三通道开关与音量，以及清空进度。
 ///
 /// 家长入口下的二级页面，主菜单不直接暴露，避免孩子误触。
 class SettingsPage extends StatelessWidget {
@@ -24,54 +24,31 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: <Widget>[
-          _Panel(
-            title: '语音',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  activeThumbColor: InkPalette.vermilion,
-                  title: const Text('字源讲述（TTS）',
-                      style: TextStyle(color: InkPalette.ink)),
-                  subtitle: const Text('关闭后单字演变阶段不再自动播放语音',
-                      style: TextStyle(color: InkPalette.inkSoft)),
-                  value: voice.enabled,
-                  onChanged: (bool v) => voice.setEnabled(v),
-                ),
-                const Divider(height: 1),
-                const SizedBox(height: 10),
-                Row(
-                  children: <Widget>[
-                    const Icon(Icons.volume_up_outlined,
-                        size: 22, color: InkPalette.inkSoft),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Slider(
-                        value: voice.volume,
-                        onChanged: voice.enabled
-                            ? (double v) => voice.setVolume(v)
-                            : null,
-                        activeColor: InkPalette.vermilion,
-                        inactiveColor:
-                            InkPalette.paperDeep.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 42,
-                      child: Text('${(voice.volume * 100).round()}%',
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            color: voice.enabled
-                                ? InkPalette.ink
-                                : InkPalette.inkSoft.withValues(alpha: 0.6),
-                            fontWeight: FontWeight.w600,
-                          )),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          _AudioChannelPanel(
+            title: '字源讲述',
+            subtitle: '关闭后单字演变阶段不再自动播放语音',
+            enabled: voice.enabled,
+            volume: voice.volume,
+            onEnabledChanged: voice.setEnabled,
+            onVolumeChanged: voice.setVolume,
+          ),
+          const SizedBox(height: 16),
+          _AudioChannelPanel(
+            title: '背景乐',
+            subtitle: '进入场景与长诗时播放，回到首页与地图会停止',
+            enabled: voice.bgmEnabled,
+            volume: voice.bgmVolume,
+            onEnabledChanged: voice.setBgmEnabled,
+            onVolumeChanged: voice.setBgmVolume,
+          ),
+          const SizedBox(height: 16),
+          _AudioChannelPanel(
+            title: '界面音效',
+            subtitle: '挖掘、拼合、演变、答对、点亮等操作反馈',
+            enabled: voice.sfxEnabled,
+            volume: voice.sfxVolume,
+            onEnabledChanged: voice.setSfxEnabled,
+            onVolumeChanged: voice.setSfxVolume,
           ),
           const SizedBox(height: 16),
           _Panel(
@@ -144,6 +121,75 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
+class _AudioChannelPanel extends StatelessWidget {
+  const _AudioChannelPanel({
+    required this.title,
+    required this.subtitle,
+    required this.enabled,
+    required this.volume,
+    required this.onEnabledChanged,
+    required this.onVolumeChanged,
+  });
+
+  final String title;
+  final String subtitle;
+  final bool enabled;
+  final double volume;
+  final ValueChanged<bool> onEnabledChanged;
+  final ValueChanged<double> onVolumeChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Panel(
+      title: title,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            activeThumbColor: InkPalette.vermilion,
+            title: Text(title,
+                style: const TextStyle(color: InkPalette.ink)),
+            subtitle: Text(subtitle,
+                style: const TextStyle(color: InkPalette.inkSoft)),
+            value: enabled,
+            onChanged: onEnabledChanged,
+          ),
+          const Divider(height: 1),
+          const SizedBox(height: 10),
+          Row(
+            children: <Widget>[
+              const Icon(Icons.volume_up_outlined,
+                  size: 22, color: InkPalette.inkSoft),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Slider(
+                  value: volume,
+                  onChanged: enabled ? onVolumeChanged : null,
+                  activeColor: InkPalette.vermilion,
+                  inactiveColor:
+                      InkPalette.paperDeep.withValues(alpha: 0.6),
+                ),
+              ),
+              SizedBox(
+                width: 42,
+                child: Text('${(volume * 100).round()}%',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: enabled
+                          ? InkPalette.ink
+                          : InkPalette.inkSoft.withValues(alpha: 0.6),
+                      fontWeight: FontWeight.w600,
+                    )),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _Panel extends StatelessWidget {
   const _Panel({required this.title, required this.child});
   final String title;
@@ -159,16 +205,16 @@ class _Panel extends StatelessWidget {
         border: Border.all(color: InkPalette.ink.withValues(alpha: 0.12)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(title,
               style: const TextStyle(
-                fontSize: 14,
+                color: InkPalette.ink,
                 fontWeight: FontWeight.w700,
-                color: InkPalette.inkSoft,
+                fontSize: 15,
                 letterSpacing: 2,
               )),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           child,
         ],
       ),

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../app_theme.dart';
 import '../data/character.dart';
 import '../data/character_repository.dart';
+import '../services/voice_service.dart';
 
 /// 应用挑战：三选一填空。
 ///
@@ -84,7 +85,13 @@ class _ApplyStageState extends State<ApplyStage> {
                             ? _OptionState.wrong
                             : _OptionState.idle,
                 onTap: _picked == null
-                    ? () => setState(() => _picked = opt)
+                    ? () {
+                        final bool ok = opt == c.quiz.answer;
+                        context
+                            .read<VoiceService>()
+                            .playSfx(ok ? 'correct' : 'wrong');
+                        setState(() => _picked = opt);
+                      }
                     : null,
               ),
           ],

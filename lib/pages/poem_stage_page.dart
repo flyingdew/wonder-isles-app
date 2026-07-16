@@ -9,6 +9,7 @@ import '../data/character_repository.dart';
 import '../data/poems.dart';
 import '../data/achievement.dart';
 import '../services/progress_store.dart';
+import '../services/voice_service.dart';
 import '../widgets/achievement_dialog.dart';
 
 /// 小诗关：把诗行里的空槽拖回正确的字。既服务场景小诗，也服务章末大诗。
@@ -48,6 +49,10 @@ class _PoemStagePageState extends State<PoemStagePage>
     super.initState();
     final math.Random rng = math.Random(_poem.sceneKey.hashCode);
     _bankOrder = _slotIds.toSet().toList()..shuffle(rng);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<VoiceService>().playBgmForScene(_poem.sceneKey);
+    });
   }
 
   @override
@@ -62,6 +67,7 @@ class _PoemStagePageState extends State<PoemStagePage>
     if (_placed.containsKey(slotIndex)) return;
     final bool correct = _slotIds[slotIndex] == charId;
     if (!correct) {
+      context.read<VoiceService>().playSfx('wrong');
       setState(() => _shakeSlot = slotIndex);
       Future<void>.delayed(const Duration(milliseconds: 380), () {
         if (!mounted) return;
@@ -69,12 +75,14 @@ class _PoemStagePageState extends State<PoemStagePage>
       });
       return;
     }
+    context.read<VoiceService>().playSfx('page');
     setState(() {
       _placed[slotIndex] = charId;
       _shakeSlot = null;
     });
     if (_allFilled && !_finished) {
       _finished = true;
+      context.read<VoiceService>().playSfx('sparkle');
       _celebrateCtrl.forward(from: 0);
       Future<void>.delayed(const Duration(milliseconds: 250), () async {
         if (!mounted) return;

@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../app_theme.dart';
 import '../data/character.dart';
+import '../services/voice_service.dart';
 
 /// 拼合：把打乱的甲骨文碎片拖到中央轮廓的对应格子里。
 ///
@@ -194,10 +196,11 @@ class _AssembleStageState extends State<AssembleStage> {
         _slotOwner[nearest] == pieceId;
     final bool matches = nearest == pieceId;
 
+    final bool snapNow = inRange && slotFree && matches;
     setState(() {
       _draggingPiece = null;
       _hoveredSlot = null;
-      if (inRange && slotFree && matches) {
+      if (snapNow) {
         _piecePos[pieceId] = _slotTopLeft(nearest);
         _slotOwner[nearest] = pieceId;
         _snapped.add(pieceId);
@@ -207,6 +210,9 @@ class _AssembleStageState extends State<AssembleStage> {
         _shakingPiece = pieceId;
       }
     });
+    if (snapNow) {
+      context.read<VoiceService>().playSfx('snap');
+    }
 
     if (!(inRange && slotFree && matches)) {
       Future<void>.delayed(const Duration(milliseconds: 340), () {
@@ -218,6 +224,7 @@ class _AssembleStageState extends State<AssembleStage> {
     }
 
     if (_finished) {
+      context.read<VoiceService>().playSfx('sparkle');
       Future<void>.delayed(const Duration(milliseconds: 420), widget.onDone);
     }
   }
