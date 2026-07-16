@@ -1,0 +1,108 @@
+name: Deploy Web to Vercel
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/**"
+      - "web/**"
+      - "assets/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "vercel.json"
+      - ".github/workflows/deploy-web.yml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "部署目标 (preview / production)"
+        required: true
+        default: production
+        type: choice
+        options:
+          - preview
+          - production
+
+concurrency:
+  group: deploy-web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    name: Build Flutter Web & Deploy
+    runs-on: ubuntu-latest
+    env:
+      FLUTTER_VERSION: "3.22.3"
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      # 手动触发时按输入决定；push 到 main 一律视为生产部署
+      TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Flutter doctor
+        run: flutter --version && flutter doctor -v
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        continue-on-error: true
+
+      - name: Build Web (release, canvaskit)
+        run: |
+          flutter build web \
+            --release \
+            --web-renderer canvaskit \
+            --base-href "/" \
+            --dart-define=BUILD_SHA=${GITHUB_SHA::7}
+
+      - name: Copy vercel.json into build output
+        run: |
+          if [ -f vercel.json ]; then
+            cp vercel.json build/web/vercel.json
+          fi
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel env (${{ env.TARGET_ENV }})
+        run: |
+          vercel pull --yes \
+            --environment=${{ env.TARGET_ENV }} \
+            --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel (${{ env.TARGET_ENV }})
+        id: deploy
+        run: |
+          if [ "${TARGET_ENV}" = "production" ]; then
+            URL=$(vercel deploy build/web \
+              --prod \
+              --yes \
+              --token=${{ secrets.VERCEL_TOKEN }})
+          else
+            URL=$(vercel deploy build/web \
+              --yes \
+              --token=${{ secrets.VERCEL_TOKEN }})
+          fi
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
+          echo "🚀 Deployed to: ${URL}"
+
+      - name: Summary
+        run: |
+          {
+            echo "## Vercel 部署完成"
+            echo ""
+            echo "- 环境：\`${TARGET_ENV}\`"
+            echo "- Commit：\`${GITHUB_SHA::7}\`"
+            echo "- URL：${{ steps.deploy.outputs.url }}"
+          } >> "$GITHUB_STEP_SUMMARY"

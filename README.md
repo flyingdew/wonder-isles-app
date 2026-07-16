@@ -135,3 +135,28 @@ iOS TestFlight 需要苹果开发者账号 + macOS 打包，还没验证。
 - **W4**：Android APK ✅ / Web H5 ✅ / iOS TestFlight ⏳
 
 详见 [docs/roadmap.md](docs/roadmap.md).
+## CI/CD：GitHub Actions → Vercel
+
+Web 版通过 `.github/workflows/deploy-web.yml` 自动构建并发布到 Vercel：
+
+- **触发**：`push` 到 `main` 且改动涉及 `lib/`、`web/`、`assets/`、`pubspec.*`、`vercel.json` 或工作流本身；也可在 Actions 页面手动 `workflow_dispatch`，选择 `preview` 或 `production`。
+- **流程**：`subosito/flutter-action` 装 Flutter 3.22.3 → `flutter pub get` → `flutter analyze`（非阻断）→ `flutter build web --release --web-renderer canvaskit` → 把 `vercel.json` 拷进 `build/web/` → `vercel pull` + `vercel deploy`。
+- **产物路径**：`build/web/`；SPA rewrite 与静态资源缓存策略见根目录 `vercel.json`。
+
+### 需要在仓库 Settings → Secrets and variables → Actions 里配置：
+
+| Secret | 说明 |
+| --- | --- |
+| `VERCEL_TOKEN` | Vercel 账号 Token（<https://vercel.com/account/tokens>） |
+| `VERCEL_ORG_ID` | Vercel Team/Personal 的 org id |
+| `VERCEL_PROJECT_ID` | 目标 Project id |
+
+拿到 `ORG_ID` / `PROJECT_ID` 最快的方式：在本地项目根目录跑一次
+
+```powershell
+npm i -g vercel
+vercel link          # 交互式选到目标 project
+Get-Content .vercel\project.json
+```
+
+`.vercel/project.json` 里就是这两个 id（`orgId` / `projectId`）。`.vercel/` 目录已被 `.gitignore` 忽略，不会入库。
