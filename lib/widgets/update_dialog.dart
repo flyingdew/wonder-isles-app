@@ -127,9 +127,14 @@ class _UpdateSheetState extends State<_UpdateSheet> {
   Future<void> _install() async {
     final File? apk = _apk;
     if (apk == null) return;
-    final InstallOutcome outcome = await widget.service.installApk(apk);
+    final InstallResult installResult = await widget.service.installApk(apk);
     if (!mounted) return;
-    switch (outcome) {
+    // 兜底：native 端返回的错误消息附加在文案后面，便于用户/开发者一眼看到真正原因。
+    final String detail =
+        (installResult.message != null && installResult.message!.isNotEmpty)
+            ? '\n\n诊断：${installResult.message}'
+            : '';
+    switch (installResult.outcome) {
       case InstallOutcome.launched:
         // 交给系统安装器后就可以关掉了；下次启动会再检查一次
         Navigator.of(context).maybePop();
@@ -137,25 +142,27 @@ class _UpdateSheetState extends State<_UpdateSheet> {
       case InstallOutcome.permissionDenied:
         setState(() {
           _phase = _Phase.failed;
-          _errorMsg = '需要在系统设置里允许"安装未知应用"，重新点击"立即升级"即可。';
+          _errorMsg = '需要在系统设置 → 应用 → 奇思岛 → 权限里，'
+              '把"安装其它应用 / 未知来源"打开，然后重试。$detail';
         });
         break;
       case InstallOutcome.noHandler:
         setState(() {
           _phase = _Phase.failed;
-          _errorMsg = '系统没有找到安装器，可以在 GitHub Releases 页面手动下载。';
+          _errorMsg = '系统没有找到安装器，可以在 GitHub Releases 页面手动下载。$detail';
         });
         break;
       case InstallOutcome.unsupported:
         setState(() {
           _phase = _Phase.failed;
-          _errorMsg = '当前平台不支持应用内安装。';
+          _errorMsg = '当前平台不支持应用内安装。$detail';
         });
         break;
       case InstallOutcome.error:
         setState(() {
           _phase = _Phase.failed;
-          _errorMsg = '安装未能开始，稍后再试。';
+          _errorMsg = '安装未能开始，可以尝试重试；或到 GitHub Releases '
+              '页面下载 APK 手动安装。$detail';
         });
         break;
     }
@@ -282,11 +289,17 @@ class _UpdateSheetState extends State<_UpdateSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (_errorMsg != null)
-              Text(
-                _errorMsg!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: InkPalette.vermilion,
-                    ),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 200),
+                child: SingleChildScrollView(
+                  child: SelectableText(
+                    _errorMsg!,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: InkPalette.vermilion,
+                          height: 1.5,
+                        ),
+                  ),
+                ),
               ),
             const SizedBox(height: 12),
             FilledButton(
@@ -303,4 +316,6 @@ class _UpdateSheetState extends State<_UpdateSheet> {
     }
   }
 }
+
+
 

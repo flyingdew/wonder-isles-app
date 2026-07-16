@@ -345,17 +345,28 @@ class UpdateService {
   }
 
   /// 触发系统 PackageInstaller。
-  /// - Android 8+ 需要 REQUEST_INSTALL_PACKAGES 权限；未授时先跳到系统页；
-  /// - open_filex 内部通过 FileProvider 交出 content:// 给 Intent，
-  ///   签名不一致时系统安装器会直接拒绝。
-  Future<InstallOutcome> installApk(File apk) async {
+  ///
+  /// 注意 REQUEST_INSTALL_PACKAGES 是 Android 的 special permission：
+  /// - 不能通过标准 request 弹窗授权，只能引导用户到系统"未知来源"设置页；
+  /// - permission_handler 在部分国产 ROM 上返回 denied 并不代表真的没授权。
+  /// 因此这里不再拦截 permission_handler，直接让 Android Intent 自己决定：
+  /// 已授权 → 拉起安装器；未授权 → 系统会自己弹"允许来自此来源"页面。
+  Future<InstallResult> installApk(File apk) async {
     if (defaultTargetPlatform != TargetPlatform.android) {
-      return InstallOutcome.unsupported;
+      return const InstallResult(InstallOutcome.unsupported);
     }
-    final PermissionStatus status =
-        await Permission.requestInstallPackages.request();
-    if (!status.isGranted) {
-      return InstallOutcome.permissionDenied;
+    if (!await apk.exists()) {
+      return InstallResult(
+        InstallOutcome.error,
+        message: '找不到已下载的 APK 文件：${apk.path}',
+      );
+    }
+    // 仅调用一次以刷新状态，不拦截；返回结果用于日志、不做拒绝依据。
+    PermissionStatus? preStatus;
+    try {
+      preStatus = await Permission.requestInstallPackages.status;
+    } catch (_) {
+      preStatus = null;
     }
     final OpenResult result = await OpenFilex.open(
       apk.path,
@@ -363,23 +374,41 @@ class UpdateService {
     );
     switch (result.type) {
       case ResultType.done:
-        return InstallOutcome.launched;
+        return const InstallResult(InstallOutcome.launched);
       case ResultType.noAppToOpen:
-        return InstallOutcome.noHandler;
+        return InstallResult(
+          InstallOutcome.noHandler,
+          message: result.message,
+        );
       case ResultType.permissionDenied:
-        return InstallOutcome.permissionDenied;
+        return InstallResult(
+          InstallOutcome.permissionDenied,
+          message: 'open_filex: ${result.message}'
+              '  |  permission_handler=$preStatus',
+        );
       case ResultType.fileNotFound:
       case ResultType.error:
-        return InstallOutcome.error;
+        return InstallResult(
+          InstallOutcome.error,
+          message: 'open_filex(${result.type.name}): ${result.message}',
+        );
     }
   }
 }
 
 enum InstallOutcome {
   launched,           // 已把 apk 交给系统安装器
-  permissionDenied,   // 用户没给"允许安装未知应用"
+  permissionDenied,   // 系统层判定未授权（多数国产 ROM 上此路径不会走到）
   noHandler,          // 没有 PackageInstaller，罕见
   unsupported,        // 非 Android
   error,              // 其它异常
 }
+
+/// 携带 native 端错误消息，便于在 UI 上显示诊断信息。
+class InstallResult {
+  const InstallResult(this.outcome, {this.message});
+  final InstallOutcome outcome;
+  final String? message;
+}
+
 
