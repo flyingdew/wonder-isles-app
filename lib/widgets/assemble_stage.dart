@@ -156,6 +156,18 @@ class _AssembleStageState extends State<AssembleStage> {
     });
   }
 
+  Offset _clampToCanvas(Offset pos) {
+    if (_canvas.isEmpty) return pos;
+    final double maxX =
+        (_canvas.width - _pieceSidePark).clamp(0.0, double.infinity);
+    final double maxY =
+        (_canvas.height - _pieceSidePark).clamp(0.0, double.infinity);
+    return Offset(
+      pos.dx.clamp(0.0, maxX),
+      pos.dy.clamp(0.0, maxY),
+    );
+  }
+
   void _handleDragUpdate(int pieceId, Offset pos) {
     final Offset center =
         pos + Offset(_pieceSidePark / 2, _pieceSidePark / 2);
@@ -165,7 +177,7 @@ class _AssembleStageState extends State<AssembleStage> {
     final double d = (center - slotCenter).distance;
     final int? next = d < _pieceSideSnap * 0.75 ? nearest : null;
     setState(() {
-      _piecePos[pieceId] = pos;
+      _piecePos[pieceId] = _clampToCanvas(pos);
       _hoveredSlot = next;
     });
   }
@@ -191,7 +203,7 @@ class _AssembleStageState extends State<AssembleStage> {
         _snapped.add(pieceId);
         _shakingPiece = null;
       } else {
-        _piecePos[pieceId] = pos;
+        _piecePos[pieceId] = _clampToCanvas(pos);
         _shakingPiece = pieceId;
       }
     });
@@ -305,6 +317,7 @@ class _AssembleStageState extends State<AssembleStage> {
                       onDragStart: () => _handleDragStart(i),
                       onDragUpdate: (Offset p) => _handleDragUpdate(i, p),
                       onDragEnd: (Offset p) => _handleDragEnd(i, p),
+                      canvasSize: _canvas,
                     ),
                 ],
               ),
@@ -353,6 +366,7 @@ class _Piece extends StatefulWidget {
     required this.onDragStart,
     required this.onDragUpdate,
     required this.onDragEnd,
+    required this.canvasSize,
   });
 
   final String image;
@@ -368,6 +382,7 @@ class _Piece extends StatefulWidget {
   final VoidCallback onDragStart;
   final ValueChanged<Offset> onDragUpdate;
   final ValueChanged<Offset> onDragEnd;
+  final Size canvasSize;
 
   @override
   State<_Piece> createState() => _PieceState();
@@ -376,6 +391,19 @@ class _Piece extends StatefulWidget {
 class _PieceState extends State<_Piece>
     with SingleTickerProviderStateMixin {
   late Offset _pos = widget.position;
+
+  Offset _clampToCanvas(Offset pos) {
+    final Size cs = widget.canvasSize;
+    if (cs.isEmpty) return pos;
+    final double maxX =
+        (cs.width - widget.parkSide).clamp(0.0, double.infinity);
+    final double maxY =
+        (cs.height - widget.parkSide).clamp(0.0, double.infinity);
+    return Offset(
+      pos.dx.clamp(0.0, maxX),
+      pos.dy.clamp(0.0, maxY),
+    );
+  }
   late final AnimationController _shakeCtrl = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 320),
@@ -431,7 +459,9 @@ class _PieceState extends State<_Piece>
           onPanUpdate: widget.snapped
               ? null
               : (DragUpdateDetails d) {
-                  setState(() => _pos += d.delta);
+                  setState(() {
+                    _pos = _clampToCanvas(_pos + d.delta);
+                  });
                   widget.onDragUpdate(_pos);
                 },
           onPanEnd: widget.snapped ? null : (_) => widget.onDragEnd(_pos),
@@ -460,7 +490,11 @@ class _PieceState extends State<_Piece>
                     ],
             ),
             child: ClipRect(
-              child: Align(
+              child: OverflowBox(
+                minWidth: side * widget.n,
+                maxWidth: side * widget.n,
+                minHeight: side * widget.n,
+                maxHeight: side * widget.n,
                 alignment: Alignment(
                   widget.n == 1
                       ? 0
@@ -469,8 +503,6 @@ class _PieceState extends State<_Piece>
                       ? 0
                       : (widget.row * 2 / (widget.n - 1)) - 1,
                 ),
-                widthFactor: 1 / widget.n,
-                heightFactor: 1 / widget.n,
                 child: Image.asset(
                   widget.image,
                   fit: BoxFit.contain,

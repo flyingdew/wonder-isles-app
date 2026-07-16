@@ -52,3 +52,8 @@ local.properties
 # Build logs
 build.log
 android/.kotlin/
+
+# Local dev server logs
+.web-server.log
+.web-server.err.log
+

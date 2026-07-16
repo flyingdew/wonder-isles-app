@@ -1,9 +1,19 @@
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import '../app_theme.dart';
 import '../data/character.dart';
 
 /// 勘探：用手指刷开泥土，露出下方的甲骨文字形。
+///
+/// 完成判定基于「已刷开的墨迹像素比例」：预先把字形下采样成 64×64 网格，
+/// 标出墨迹（alpha 高且亮度低）的格子；刷子经过时把落在字形内的墨格
+/// 计入 [_brushedInk]。达到 [_revealTargetRatio] 即算完成，避免在空白
+/// 处乱刷也能过关。
 class DigStage extends StatefulWidget {
   const DigStage({super.key, required this.character, required this.onDone});
   final WonderCharacter character;
@@ -16,21 +26,133 @@ class DigStage extends StatefulWidget {
 class _DigStageState extends State<DigStage> {
   final List<Offset> _points = <Offset>[];
   Size _canvasSize = Size.zero;
+  Rect _imageRect = Rect.zero;
   bool _finished = false;
 
   static const double _brushRadius = 34.0;
-  static const double _revealTargetRatio = 0.55;
+  static const double _revealTargetRatio = 0.62;
+  static const int _gridSide = 64;
+  static const double _paperPad = 32;
+
+  Uint8List? _inkMask;
+  int _totalInk = 0;
+  final Set<int> _brushedInk = <int>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInkMask();
+  }
+
+  @override
+  void didUpdateWidget(covariant DigStage old) {
+    super.didUpdateWidget(old);
+    if (old.character.id != widget.character.id) {
+      _points.clear();
+      _brushedInk.clear();
+      _finished = false;
+      _inkMask = null;
+      _totalInk = 0;
+      _loadInkMask();
+    }
+  }
+
+  Future<void> _loadInkMask() async {
+    final String asset = widget.character.oracleImage;
+    final ByteData raw = await rootBundle.load(asset);
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      raw.buffer.asUint8List(),
+      targetWidth: _gridSide,
+      targetHeight: _gridSide,
+    );
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    final ByteData? bd =
+        await frame.image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    frame.image.dispose();
+    if (bd == null || !mounted) return;
+    final Uint8List bytes = bd.buffer.asUint8List();
+    final Uint8List mask = Uint8List(_gridSide * _gridSide);
+    int totalInk = 0;
+    for (int i = 0; i < mask.length; i++) {
+      final int r = bytes[i * 4];
+      final int g = bytes[i * 4 + 1];
+      final int b = bytes[i * 4 + 2];
+      final int a = bytes[i * 4 + 3];
+      final double lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0;
+      // 认定为墨迹：足够不透明且颜色够深。
+      if (a > 40 && lum < 0.55) {
+        mask[i] = 1;
+        totalInk++;
+      }
+    }
+    // 极端情况下几乎全透明或全白，退回全格计数，避免除零。
+    if (totalInk == 0) totalInk = mask.length;
+    if (!mounted) return;
+    setState(() {
+      _inkMask = mask;
+      _totalInk = totalInk;
+    });
+  }
+
+  Rect _computeImageRect(Size canvas) {
+    final Rect inner = Rect.fromLTWH(
+      _paperPad,
+      _paperPad,
+      canvas.width - 2 * _paperPad,
+      canvas.height - 2 * _paperPad,
+    );
+    if (inner.width <= 0 || inner.height <= 0) return Rect.zero;
+    // 字形 PNG 为方形，BoxFit.contain 后取最短边居中。
+    final double side = inner.shortestSide;
+    return Rect.fromCenter(
+      center: inner.center,
+      width: side,
+      height: side,
+    );
+  }
 
   double get _revealedRatio {
-    if (_canvasSize.isEmpty || _points.isEmpty) return 0;
-    // 粗略估算：每一点覆盖 π r²，与画布面积对比。上限 1.0。
-    final double covered = _points.length * 3.14159 * _brushRadius * _brushRadius * 0.35;
-    final double area = _canvasSize.width * _canvasSize.height;
-    return (covered / area).clamp(0.0, 1.0);
+    if (_totalInk == 0) return 0;
+    return (_brushedInk.length / _totalInk).clamp(0.0, 1.0);
+  }
+
+  void _markBrushed(Offset o) {
+    final Uint8List? mask = _inkMask;
+    if (mask == null || !_imageRect.contains(o)) return;
+    final double relX = (o.dx - _imageRect.left) / _imageRect.width;
+    final double relY = (o.dy - _imageRect.top) / _imageRect.height;
+    if (relX < 0 || relX > 1 || relY < 0 || relY > 1) return;
+
+    final double cxF = relX * _gridSide;
+    final double cyF = relY * _gridSide;
+    final double rXF = (_brushRadius / _imageRect.width) * _gridSide;
+    final double rYF = (_brushRadius / _imageRect.height) * _gridSide;
+    final int rX = rXF.ceil().clamp(1, _gridSide);
+    final int rY = rYF.ceil().clamp(1, _gridSide);
+    final int cx = cxF.floor();
+    final int cy = cyF.floor();
+
+    for (int dy = -rY; dy <= rY; dy++) {
+      final int y = cy + dy;
+      if (y < 0 || y >= _gridSide) continue;
+      for (int dx = -rX; dx <= rX; dx++) {
+        final int x = cx + dx;
+        if (x < 0 || x >= _gridSide) continue;
+        // 椭圆内判定，避免 x/y 缩放不同带来的偏差。
+        final double nx = dx / rX;
+        final double ny = dy / rY;
+        if (nx * nx + ny * ny > 1) continue;
+        final int idx = y * _gridSide + x;
+        if (mask[idx] == 1) _brushedInk.add(idx);
+      }
+    }
   }
 
   void _addPoint(Offset o) {
-    setState(() => _points.add(o));
+    setState(() {
+      _points.add(o);
+      _markBrushed(o);
+    });
     if (!_finished && _revealedRatio >= _revealTargetRatio) {
       _finished = true;
       Future<void>.delayed(const Duration(milliseconds: 250), widget.onDone);
@@ -47,6 +169,7 @@ class _DigStageState extends State<DigStage> {
         Expanded(
           child: LayoutBuilder(builder: (BuildContext ctx, BoxConstraints cons) {
             _canvasSize = Size(cons.maxWidth, cons.maxHeight);
+            _imageRect = _computeImageRect(_canvasSize);
             return ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Stack(
@@ -56,7 +179,7 @@ class _DigStageState extends State<DigStage> {
                   ColoredBox(
                     color: InkPalette.paperDeep,
                     child: Padding(
-                      padding: const EdgeInsets.all(32),
+                      padding: const EdgeInsets.all(_paperPad),
                       child: Image.asset(widget.character.oracleImage,
                           fit: BoxFit.contain),
                     ),
@@ -65,8 +188,10 @@ class _DigStageState extends State<DigStage> {
                   Positioned.fill(
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onPanDown: (DragDownDetails d) => _addPoint(d.localPosition),
-                      onPanUpdate: (DragUpdateDetails d) => _addPoint(d.localPosition),
+                      onPanDown: (DragDownDetails d) =>
+                          _addPoint(d.localPosition),
+                      onPanUpdate: (DragUpdateDetails d) =>
+                          _addPoint(d.localPosition),
                       child: CustomPaint(
                         painter: _DirtMaskPainter(
                           points: _points,

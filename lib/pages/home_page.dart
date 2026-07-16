@@ -1,9 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../app_theme.dart';
 import '../services/progress_store.dart';
+import '../data/poems.dart';
 import 'island_map_page.dart';
+import 'poem_stage_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -63,6 +66,10 @@ class HomePage extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (kDebugMode && kIsWeb) ...<Widget>[
+                    const SizedBox(height: 12),
+                    const _DebugShortcuts(),
+                  ],
                   const SizedBox(height: 24),
                 ],
               ),
@@ -158,6 +165,98 @@ class _PaperBackdrop extends StatelessWidget {
         ),
       ),
       child: SizedBox.expand(),
+    );
+  }
+}
+
+
+
+/// 仅在 Web + Debug 下渲染的测试直达入口。
+class _DebugShortcuts extends StatelessWidget {
+  const _DebugShortcuts();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      decoration: BoxDecoration(
+        color: InkPalette.paperDeep.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: InkPalette.ink.withValues(alpha: 0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Row(
+            children: <Widget>[
+              Icon(Icons.bug_report,
+                  size: 16, color: InkPalette.inkSoft),
+              SizedBox(width: 6),
+              Text('DEBUG · 仅 Web 调试可见',
+                  style: TextStyle(
+                    color: InkPalette.inkSoft,
+                    fontSize: 12,
+                    letterSpacing: 1,
+                    fontWeight: FontWeight.w600,
+                  )),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: <Widget>[
+              _DebugChip(
+                label: '直达 · Boss 长诗',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) =>
+                        const PoemStagePage.forPoem(poem: kBossPoem),
+                  ),
+                ),
+              ),
+              for (final ScenePoem p in kScenePoems)
+                _DebugChip(
+                  label: '直达 · ${p.title}',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          PoemStagePage.forPoem(poem: p),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DebugChip extends StatelessWidget {
+  const _DebugChip({required this.label, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: InkPalette.paper,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Text(label,
+              style: const TextStyle(
+                fontSize: 12,
+                color: InkPalette.ink,
+                fontWeight: FontWeight.w600,
+              )),
+        ),
+      ),
     );
   }
 }

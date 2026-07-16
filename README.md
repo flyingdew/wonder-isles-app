@@ -32,6 +32,44 @@ wonder-isles-app/
     └── roadmap.md
 ```
 
+## 本地 Web dev server（H5 调试）
+
+推荐前台跑，方便按 `r` 热重载 / `R` 热重启：
+
+`powershell
+cd E:\demo\wonder-isles\wonder-isles-app
+flutter run -d web-server --web-port=8123 --web-hostname=localhost
+`
+
+浏览器打开 <http://localhost:8123>。首次编译要等 40-60 秒，之后差量编译秒级。
+浏览器缓存较顽固，改动看不到时按 `Ctrl+Shift+R` 硬刷新一次。
+
+如果需要**后台常驻**（关掉终端也不停），用下面这段：
+
+`powershell
+cd E:\demo\wonder-isles\wonder-isles-app
+Start-Process -FilePath "flutter" `
+  -ArgumentList "run","-d","web-server","--web-port=8123","--web-hostname=localhost" `
+  -WorkingDirectory (Get-Location) `
+  -RedirectStandardOutput ".\.web-server.log" `
+  -RedirectStandardError  ".\.web-server.err.log" `
+  -WindowStyle Hidden
+`
+
+日志实时看：`Get-Content .\.web-server.log -Wait`。
+
+**停掉 dev server**（前台按 `Ctrl+C` 即可；后台版本用这句）：
+
+`powershell
+Get-Process dart, dartaotruntime -ErrorAction SilentlyContinue | Stop-Process -Force
+`
+
+**重启一次**：先执行上面的停掉命令，然后再跑一次启动命令。
+
+> Debug + Web 环境下，首页会额外出现「DEBUG · 仅 Web 调试可见」的胶囊面板，
+> 可以直达任意场景小诗 / Boss 长诗，方便测试。岛屿地图上的 Boss 入口也会
+> 直接解锁。release 构建（`flutter build apk/web --release`）不会带这些。
+
 ## 快速开始（有 Flutter SDK）
 
 目前 `lib/` 与 `assets/` 是手工写好的，平台目录还没建，第一次拉下来要跑一下：

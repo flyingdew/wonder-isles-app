@@ -31,7 +31,7 @@ class _EvolutionStageState extends State<EvolutionStage> {
   Future<void> _start() async {
     unawaited(context.read<VoiceService>().play(widget.character.voiceAsset));
     for (int i = 1; i < _labels.length; i++) {
-      await Future<void>.delayed(const Duration(milliseconds: 1200));
+      await Future<void>.delayed(const Duration(seconds: 5));
       if (!mounted) return;
       setState(() => _index = i);
     }
@@ -56,7 +56,7 @@ class _EvolutionStageState extends State<EvolutionStage> {
             child: Padding(
               padding: const EdgeInsets.all(28),
               child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 1400),
                 switchInCurve: Curves.easeOut,
                 child: Image.asset(
                   c.evolutionFrames[_index],

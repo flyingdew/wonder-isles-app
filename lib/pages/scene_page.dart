@@ -6,6 +6,7 @@ import '../data/character.dart';
 import '../data/character_repository.dart';
 import '../services/progress_store.dart';
 import 'character_flow_page.dart';
+import 'poem_stage_page.dart';
 
 /// 一个场景（河岸/山林/…）里的 5 个字入口。
 class ScenePage extends StatelessWidget {
@@ -17,6 +18,9 @@ class ScenePage extends StatelessWidget {
     final CharacterRepository repo = context.read<CharacterRepository>();
     final ProgressStore progress = context.watch<ProgressStore>();
     final List<WonderCharacter> chars = repo.forScene(scene);
+    final int lit = chars.where((WonderCharacter c) => progress.isLit(c.id)).length;
+    final bool allLit = lit == chars.length;
+    final bool poemDone = progress.isPoemDone(scene.key);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -26,7 +30,7 @@ class ScenePage extends StatelessWidget {
         children: <Widget>[
           ColorFiltered(
             colorFilter: ColorFilter.mode(
-              InkPalette.paper.withValues(alpha: 0.35),
+              InkPalette.paper.withValues(alpha: poemDone ? 0.15 : 0.35),
               BlendMode.lighten,
             ),
             child: Image.asset(scene.background, fit: BoxFit.cover),
@@ -38,18 +42,22 @@ class ScenePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   const SizedBox(height: 8),
-                  Text('点击一处可疑之地，开始挖掘',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: InkPalette.inkSoft,
-                        fontSize: 15,
-                        shadows: <Shadow>[
-                          Shadow(
-                            color: InkPalette.paper.withValues(alpha: 0.8),
-                            blurRadius: 6,
-                          ),
-                        ],
-                      )),
+                  Text(
+                    poemDone
+                        ? '小诗已成，此处已被点亮'
+                        : (allLit ? '五字齐亮，可以试着写小诗了' : '点击一处可疑之地，开始挖掘'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: InkPalette.inkSoft,
+                      fontSize: 15,
+                      shadows: <Shadow>[
+                        Shadow(
+                          color: InkPalette.paper.withValues(alpha: 0.8),
+                          blurRadius: 6,
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Expanded(
                     child: GridView.count(
@@ -73,11 +81,77 @@ class ScenePage extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  _PoemEntry(
+                    allLit: allLit,
+                    poemDone: poemDone,
+                    onEnter: () {
+                      Navigator.of(context).push(MaterialPageRoute<void>(
+                        builder: (_) => PoemStagePage.forScene(scene: scene),
+                      ));
+                    },
+                  ),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PoemEntry extends StatelessWidget {
+  const _PoemEntry({
+    required this.allLit,
+    required this.poemDone,
+    required this.onEnter,
+  });
+  final bool allLit;
+  final bool poemDone;
+  final VoidCallback onEnter;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool enabled = allLit;
+    final String label = poemDone
+        ? '重温小诗'
+        : (enabled ? '进入小诗关' : '点亮全部 5 字后开启');
+    final IconData icon = poemDone
+        ? Icons.auto_stories
+        : (enabled ? Icons.brush : Icons.lock_outline);
+    return Material(
+      color: poemDone
+          ? InkPalette.glow.withValues(alpha: 0.9)
+          : (enabled
+              ? InkPalette.vermilion
+              : InkPalette.paperDeep.withValues(alpha: 0.85)),
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: enabled ? onEnter : null,
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(icon,
+                  color: enabled ? InkPalette.paper : InkPalette.inkSoft,
+                  size: 20),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: poemDone
+                      ? InkPalette.ink
+                      : (enabled ? InkPalette.paper : InkPalette.inkSoft),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -136,3 +210,4 @@ class _DigSpot extends StatelessWidget {
     );
   }
 }
+
