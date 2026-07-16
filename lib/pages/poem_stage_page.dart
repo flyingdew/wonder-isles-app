@@ -7,7 +7,9 @@ import '../app_theme.dart';
 import '../data/character.dart';
 import '../data/character_repository.dart';
 import '../data/poems.dart';
+import '../data/achievement.dart';
 import '../services/progress_store.dart';
+import '../widgets/achievement_dialog.dart';
 
 /// 小诗关：把诗行里的空槽拖回正确的字。既服务场景小诗，也服务章末大诗。
 class PoemStagePage extends StatefulWidget {
@@ -74,9 +76,13 @@ class _PoemStagePageState extends State<PoemStagePage>
     if (_allFilled && !_finished) {
       _finished = true;
       _celebrateCtrl.forward(from: 0);
-      Future<void>.delayed(const Duration(milliseconds: 250), () {
+      Future<void>.delayed(const Duration(milliseconds: 250), () async {
         if (!mounted) return;
-        context.read<ProgressStore>().markPoemDone(_poem.sceneKey);
+        final List<Achievement> unlocked = await context
+            .read<ProgressStore>()
+            .markPoemDone(_poem.sceneKey);
+        if (!mounted) return;
+        await showAchievementUnlocked(context, unlocked);
       });
     }
   }

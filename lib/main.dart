@@ -19,6 +19,7 @@ Future<void> main() async {
 
   final ProgressStore progress = ProgressStore();
   await progress.load();
+  progress.attachRepository(repository);
 
   final VoiceService voice = VoiceService();
   await voice.load();

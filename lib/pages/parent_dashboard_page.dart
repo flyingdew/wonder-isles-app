@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../app_theme.dart';
+import '../data/achievement.dart';
 import '../data/character.dart';
 import '../data/character_repository.dart';
 import '../data/parent_tips.dart';
 import '../data/poems.dart';
 import '../services/progress_store.dart';
+import '../widgets/achievement_dialog.dart';
 import 'settings_page.dart';
 
 /// 家长视图：整章进度、最喜欢的字、共读建议、清空进度。
@@ -63,6 +65,8 @@ class ParentDashboardPage extends StatelessWidget {
           _RecentlyVisited(chars: ranked.take(5).toList(), visits: visits),
           const SizedBox(height: 16),
           _ReadTogether(favorite: favorite),
+          const SizedBox(height: 16),
+          _AchievementWall(unlocked: progress.unlockedAchievements),
           const SizedBox(height: 24),
         ],
       ),
@@ -338,6 +342,85 @@ class _StatRow extends StatelessWidget {
               color: InkPalette.ink,
               fontSize: 16,
             )),
+      ],
+    );
+  }
+}
+
+
+class _AchievementWall extends StatelessWidget {
+  const _AchievementWall({required this.unlocked});
+  final Set<String> unlocked;
+
+  @override
+  Widget build(BuildContext context) {
+    final int count = unlocked.length;
+    final int total = kAchievements.length;
+    return _Panel(
+      title: '成就墙 · $count / $total',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          for (int i = 0; i < kAchievements.length; i++) ...<Widget>[
+            _AchievementRow(
+              achievement: kAchievements[i],
+              unlocked: unlocked.contains(kAchievements[i].id),
+            ),
+            if (i != kAchievements.length - 1)
+              Divider(
+                  height: 18,
+                  color: InkPalette.ink.withValues(alpha: 0.08)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AchievementRow extends StatelessWidget {
+  const _AchievementRow({
+    required this.achievement,
+    required this.unlocked,
+  });
+  final Achievement achievement;
+  final bool unlocked;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color titleColor =
+        unlocked ? InkPalette.ink : InkPalette.inkSoft.withValues(alpha: 0.7);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        AchievementBadge(achievement: achievement, unlocked: unlocked),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                achievement.title,
+                style: TextStyle(
+                  color: titleColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                achievement.description,
+                style: TextStyle(
+                  color: InkPalette.inkSoft.withValues(alpha: unlocked ? 1 : 0.7),
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (!unlocked)
+          Icon(Icons.lock_outline,
+              size: 18, color: InkPalette.inkSoft.withValues(alpha: 0.5)),
       ],
     );
   }

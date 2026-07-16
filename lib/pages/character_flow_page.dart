@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../app_theme.dart';
 import '../data/character.dart';
 import '../services/progress_store.dart';
+import '../data/achievement.dart';
 import '../services/voice_service.dart';
+import '../widgets/achievement_dialog.dart';
 import '../widgets/apply_stage.dart';
 import '../widgets/assemble_stage.dart';
 import '../widgets/dig_stage.dart';
@@ -81,9 +83,12 @@ class _CharacterFlowPageState extends State<CharacterFlowPage> {
   }
 
   Future<void> _onFinish() async {
-    await context.read<ProgressStore>().markLit(widget.character.id);
+    final List<Achievement> unlocked =
+        await context.read<ProgressStore>().markLit(widget.character.id);
     if (!mounted) return;
     setState(() => _step = FlowStep.done);
+    if (!mounted) return;
+    await showAchievementUnlocked(context, unlocked);
   }
 
   @override

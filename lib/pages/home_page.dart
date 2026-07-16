@@ -3,14 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../app_theme.dart';
-import '../services/progress_store.dart';
+import '../data/achievement.dart';
 import '../data/poems.dart';
+import '../services/progress_store.dart';
+import '../widgets/achievement_dialog.dart';
 import 'island_map_page.dart';
 import 'parent_dashboard_page.dart';
 import 'poem_stage_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final List<Achievement> unlocked =
+          await context.read<ProgressStore>().recordDailyVisit();
+      if (!mounted) return;
+      await showAchievementUnlocked(context, unlocked);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

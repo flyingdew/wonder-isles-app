@@ -1,21 +1,34 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 本地存档：记录点亮过的字 id、以及每个字的复访次数。
-/// v2 起额外记录已完成的场景小诗 id 集合。
+import '../data/achievement.dart';
+import '../data/character.dart';
+import '../data/character_repository.dart';
+
+/// 本地存档：记录点亮过的字 id、每字复访次数、已完成场景诗、成就与连续访问天数。
 class ProgressStore extends ChangeNotifier {
   static const String _kLit = 'wonder_isles.lit';
   static const String _kVisitPrefix = 'wonder_isles.visit.';
   static const String _kPoems = 'wonder_isles.poems';
+  static const String _kAchievements = 'wonder_isles.achievements';
+  static const String _kLastVisit = 'wonder_isles.streak.lastVisit';
+  static const String _kStreak = 'wonder_isles.streak.count';
 
   final Set<String> _lit = <String>{};
   final Map<String, int> _visits = <String, int>{};
   final Set<String> _poems = <String>{};
+  final Set<String> _achievements = <String>{};
   SharedPreferences? _prefs;
+  CharacterRepository? _repo;
+  DateTime? _lastVisit;
+  int _streak = 0;
 
   Set<String> get litIds => Set<String>.unmodifiable(_lit);
   int get litCount => _lit.length;
   Set<String> get completedPoems => Set<String>.unmodifiable(_poems);
+  Set<String> get unlockedAchievements =>
+      Set<String>.unmodifiable(_achievements);
+  int get streakDays => _streak;
 
   Future<void> load() async {
     _prefs = await SharedPreferences.getInstance();
@@ -25,6 +38,9 @@ class ProgressStore extends ChangeNotifier {
     _poems
       ..clear()
       ..addAll(_prefs?.getStringList(_kPoems) ?? <String>[]);
+    _achievements
+      ..clear()
+      ..addAll(_prefs?.getStringList(_kAchievements) ?? <String>[]);
     _visits.clear();
     for (final String key in _prefs?.getKeys() ?? const <String>{}) {
       if (key.startsWith(_kVisitPrefix)) {
@@ -32,33 +48,108 @@ class ProgressStore extends ChangeNotifier {
             _prefs?.getInt(key) ?? 0;
       }
     }
+    final String? lastRaw = _prefs?.getString(_kLastVisit);
+    _lastVisit = lastRaw == null ? null : DateTime.tryParse(lastRaw);
+    _streak = _prefs?.getInt(_kStreak) ?? 0;
+  }
+
+  /// 由 main() 在字库加载完后注入，成就评估需要按场景/整章计数。
+  void attachRepository(CharacterRepository repo) {
+    _repo = repo;
   }
 
   bool isLit(String id) => _lit.contains(id);
   int visits(String id) => _visits[id] ?? 0;
   Map<String, int> get allVisits => Map<String, int>.unmodifiable(_visits);
   bool isPoemDone(String sceneKey) => _poems.contains(sceneKey);
+  bool hasAchievement(String id) => _achievements.contains(id);
 
-  Future<void> markLit(String id) async {
+  Future<List<Achievement>> markLit(String id) async {
     _visits[id] = (_visits[id] ?? 0) + 1;
     await _prefs?.setInt('$_kVisitPrefix$id', _visits[id]!);
     if (_lit.add(id)) {
       await _prefs?.setStringList(_kLit, _lit.toList());
     }
     notifyListeners();
+    return _evaluate();
   }
 
-  Future<void> markPoemDone(String sceneKey) async {
+  Future<List<Achievement>> markPoemDone(String sceneKey) async {
     if (_poems.add(sceneKey)) {
       await _prefs?.setStringList(_kPoems, _poems.toList());
       notifyListeners();
     }
+    return _evaluate();
+  }
+
+  /// 应用入口调用一次，按今天日期滚动 streak，并可能解锁"三日结伴"。
+  Future<List<Achievement>> recordDailyVisit() async {
+    final DateTime now = DateTime.now();
+    final DateTime today = DateTime(now.year, now.month, now.day);
+    final DateTime? last = _lastVisit == null
+        ? null
+        : DateTime(_lastVisit!.year, _lastVisit!.month, _lastVisit!.day);
+
+    if (last == null) {
+      _streak = 1;
+    } else {
+      final int diff = today.difference(last).inDays;
+      if (diff == 0) {
+        // 同一天再次进入，不变。
+      } else if (diff == 1) {
+        _streak += 1;
+      } else {
+        _streak = 1;
+      }
+    }
+    _lastVisit = today;
+    await _prefs?.setString(_kLastVisit, today.toIso8601String());
+    await _prefs?.setInt(_kStreak, _streak);
+    notifyListeners();
+    return _evaluate();
+  }
+
+  Future<List<Achievement>> _evaluate() async {
+    final List<Achievement> newly = <Achievement>[];
+
+    void tryUnlock(String id) {
+      if (_achievements.contains(id)) return;
+      newly.add(achievementById(id));
+      _achievements.add(id);
+    }
+
+    if (_lit.isNotEmpty) tryUnlock('first_lit');
+    if (_repo != null) {
+      for (final SceneId scene in SceneId.values) {
+        final Set<String> ids =
+            _repo!.forScene(scene).map((c) => c.id).toSet();
+        if (ids.isNotEmpty && ids.every(_lit.contains)) {
+          tryUnlock('scene_complete');
+          break;
+        }
+      }
+      final Set<String> all = _repo!.all.map((c) => c.id).toSet();
+      if (all.isNotEmpty && all.every(_lit.contains)) {
+        tryUnlock('all_lit');
+      }
+    }
+    if (_poems.contains('boss')) tryUnlock('poem_boss');
+    if (_streak >= 3) tryUnlock('streak_3');
+
+    if (newly.isNotEmpty) {
+      await _prefs?.setStringList(_kAchievements, _achievements.toList());
+      notifyListeners();
+    }
+    return newly;
   }
 
   Future<void> reset() async {
     _lit.clear();
     _visits.clear();
     _poems.clear();
+    _achievements.clear();
+    _lastVisit = null;
+    _streak = 0;
     await _prefs?.clear();
     notifyListeners();
   }
