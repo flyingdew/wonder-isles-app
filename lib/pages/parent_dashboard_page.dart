@@ -7,6 +7,7 @@ import '../data/character_repository.dart';
 import '../data/parent_tips.dart';
 import '../data/poems.dart';
 import '../services/progress_store.dart';
+import 'settings_page.dart';
 
 /// 家长视图：整章进度、最喜欢的字、共读建议、清空进度。
 ///
@@ -36,6 +37,17 @@ class ParentDashboardPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('家长视图',
             style: TextStyle(fontWeight: FontWeight.w600)),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: '设置',
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (_) => const SettingsPage(),
+              ));
+            },
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
@@ -52,37 +64,11 @@ class ParentDashboardPage extends StatelessWidget {
           const SizedBox(height: 16),
           _ReadTogether(favorite: favorite),
           const SizedBox(height: 24),
-          _DangerZone(onReset: () => _confirmReset(context, progress)),
         ],
       ),
     );
   }
 
-  Future<void> _confirmReset(
-      BuildContext context, ProgressStore progress) async {
-    final bool? ok = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext ctx) => AlertDialog(
-        title: const Text('清空进度'),
-        content: const Text('这会删除所有已点亮的字、小诗完成状态和回访次数，无法恢复。'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-                backgroundColor: InkPalette.vermilion),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('清空'),
-          ),
-        ],
-      ),
-    );
-    if (ok == true) {
-      await progress.reset();
-    }
-  }
 }
 
 class _SummaryCard extends StatelessWidget {
@@ -293,22 +279,6 @@ class _ReadTogether extends StatelessWidget {
   }
 }
 
-class _DangerZone extends StatelessWidget {
-  const _DangerZone({required this.onReset});
-  final VoidCallback onReset;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: TextButton.icon(
-        onPressed: onReset,
-        icon: const Icon(Icons.restart_alt, size: 18),
-        label: const Text('清空进度'),
-        style: TextButton.styleFrom(foregroundColor: InkPalette.inkSoft),
-      ),
-    );
-  }
-}
 
 class _Panel extends StatelessWidget {
   const _Panel({required this.title, required this.child});

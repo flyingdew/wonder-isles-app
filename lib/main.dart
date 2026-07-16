@@ -20,9 +20,13 @@ Future<void> main() async {
   final ProgressStore progress = ProgressStore();
   await progress.load();
 
+  final VoiceService voice = VoiceService();
+  await voice.load();
+
   runApp(WonderIslesApp(
     repository: repository,
     progress: progress,
+    voice: voice,
   ));
 }
 
@@ -31,10 +35,12 @@ class WonderIslesApp extends StatelessWidget {
     super.key,
     required this.repository,
     required this.progress,
+    required this.voice,
   });
 
   final CharacterRepository repository;
   final ProgressStore progress;
+  final VoiceService voice;
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +48,7 @@ class WonderIslesApp extends StatelessWidget {
       providers: [
         Provider<CharacterRepository>.value(value: repository),
         ChangeNotifierProvider<ProgressStore>.value(value: progress),
-        Provider<VoiceService>(
-          create: (_) => VoiceService(),
-          dispose: (_, VoiceService v) => v.dispose(),
-        ),
+        ChangeNotifierProvider<VoiceService>.value(value: voice),
       ],
       child: MaterialApp(
         title: '奇思岛',
