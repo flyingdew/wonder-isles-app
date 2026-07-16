@@ -14,15 +14,17 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
   ]);
 
+  // 三个 load 之间只有 attachRepository 依赖 repository 就绪，其余互不依赖，
+  // 并行加载可以显著缩短冷启动的白屏时间。
   final CharacterRepository repository = CharacterRepository();
-  await repository.load();
-
   final ProgressStore progress = ProgressStore();
-  await progress.load();
-  progress.attachRepository(repository);
-
   final VoiceService voice = VoiceService();
-  await voice.load();
+  await Future.wait(<Future<void>>[
+    repository.load(),
+    progress.load(),
+    voice.load(),
+  ]);
+  progress.attachRepository(repository);
 
   runApp(WonderIslesApp(
     repository: repository,
