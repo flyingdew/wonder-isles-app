@@ -21,7 +21,7 @@ class EvolutionStage extends StatefulWidget {
 
 class _EvolutionStageState extends State<EvolutionStage> {
   static const List<String> _labels = <String>['甲骨', '金文', '小篆', '楷书'];
-  static const Duration _stepInterval = Duration(seconds: 2);
+  static const Duration _stepInterval = Duration(milliseconds: 500);
 
   int _revealed = 1; // 已揭示的帧数（第 1 帧一开始就在）
   Timer? _timer;
