@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 与 lib/app_theme.dart InkPalette.paper 保持一致 -->
+    <color name="ink_paper">#FFF6EEDD</color>
+</resources>

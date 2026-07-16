@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // 水墨 · 暖色调色板。参考 assets/scenes/palette.png 手取。
 class InkPalette {
@@ -37,6 +38,14 @@ ThemeData buildWonderIslesTheme() {
       foregroundColor: InkPalette.ink,
       elevation: 0,
       centerTitle: true,
+      // 每个页面的 AppBar 也保持米色 status bar + 深色图标，避免路由切换时闪回默认。
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: InkPalette.paper,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: InkPalette.paper,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -51,3 +60,4 @@ ThemeData buildWonderIslesTheme() {
     ),
   );
 }
+

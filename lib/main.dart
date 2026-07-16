@@ -13,6 +13,16 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
     DeviceOrientation.portraitUp,
   ]);
+  // 状态栏 / 导航栏与主题背景保持一致，避免首屏一瞬颜色跳变。
+  // 与 android/app/src/main/res/values/colors.xml 的 ink_paper 完全对齐。
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Color(0xFFF6EEDD),
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+    systemNavigationBarColor: Color(0xFFF6EEDD),
+    systemNavigationBarIconBrightness: Brightness.dark,
+    systemNavigationBarDividerColor: Color(0xFFF6EEDD),
+  ));
 
   // 三个 load 之间只有 attachRepository 依赖 repository 就绪，其余互不依赖，
   // 并行加载可以显著缩短冷启动的白屏时间。
