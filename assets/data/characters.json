@@ -6,7 +6,7 @@
     "scene": "river",
     "order": 1,
     "story": "古人抬头看见太阳，画了一个圆圈，中间点一点，代表太阳的光。",
-    "quiz": { "type": "cloze", "text": "太{blank}出来了", "answer": "阳" }
+    "quiz": { "type": "cloze", "text": "{blank}出东方", "answer": "日" }
   },
   {
     "id": "yue",
@@ -60,7 +60,7 @@
     "scene": "forest",
     "order": 7,
     "story": "一棵树，有枝有干还有根。",
-    "quiz": { "type": "cloze", "text": "大{blank}下乘凉", "answer": "树" }
+    "quiz": { "type": "cloze", "text": "山有{blank}兮木有枝", "answer": "木" }
   },
   {
     "id": "niao",
