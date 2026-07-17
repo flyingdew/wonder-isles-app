@@ -27,6 +27,9 @@ class VoiceService extends ChangeNotifier {
   static const String _kSfxEnabled = 'wonder_isles.sfx.enabled';
   static const String _kSfxVolume = 'wonder_isles.sfx.volume';
 
+  /// TTS 语速。Edge TTS 录制偏快，稍慢 0.9 更适合 6-8 岁孩子跟读。
+  static const double _ttsRate = 0.9;
+
   final AudioPlayer _ttsPlayer;
   final AudioPlayer _bgmPlayer;
   final AudioPlayer _sfxPlayer;
@@ -46,6 +49,11 @@ class VoiceService extends ChangeNotifier {
   double get bgmVolume => _bgmVolume;
   bool get sfxEnabled => _sfxEnabled;
   double get sfxVolume => _sfxVolume;
+
+  /// TTS 播放进度流（供字幕逐句高亮使用）。
+  Stream<Duration> get onTtsPosition => _ttsPlayer.onPositionChanged;
+  Stream<Duration> get onTtsDuration => _ttsPlayer.onDurationChanged;
+  Stream<void> get onTtsComplete => _ttsPlayer.onPlayerComplete;
 
   Future<void> load() async {
     _prefs = await SharedPreferences.getInstance();
@@ -85,6 +93,7 @@ class VoiceService extends ChangeNotifier {
     try {
       await _ttsPlayer.stop();
       await _ttsPlayer.setVolume(_volume);
+      await _ttsPlayer.setPlaybackRate(_ttsRate);
       await _ttsPlayer.play(AssetSource(asset));
     } catch (_) {}
   }
