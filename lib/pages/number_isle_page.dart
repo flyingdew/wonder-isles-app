@@ -41,11 +41,16 @@ class _NumberIslePageState extends State<NumberIslePage> {
         progress.isPoemDone(NumberPoemPage.sceneKey);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('数之岛 · 云上小铺',
             style: TextStyle(fontWeight: FontWeight.w600)),
       ),
-      body: ListView(
+      body: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          const _ShopBackdrop(),
+          ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: <Widget>[
           const _Intro(),
@@ -79,6 +84,8 @@ class _NumberIslePageState extends State<NumberIslePage> {
               setState(() {});
             },
           ),
+        ],
+      ),
         ],
       ),
     );
@@ -295,6 +302,37 @@ class _RhymeEntry extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+class _ShopBackdrop extends StatelessWidget {
+  const _ShopBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        Image(
+          image: AssetImage('assets/scenes/shop.png'),
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[
+                Color(0x66F6EEDD),
+                Color(0xE6F6EEDD),
+                Color(0xF7F6EEDD),
+              ],
+              stops: <double>[0.0, 0.45, 0.8],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

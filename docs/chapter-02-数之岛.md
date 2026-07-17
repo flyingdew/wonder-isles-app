@@ -50,7 +50,7 @@
 
 ## 资源占位
 
-- 场景背景：`assets/scenes/shop.png`（待补，v0 用现有 river 背景兜底渲染）。
+- 场景背景：`assets/scenes/shop.png`（1024x768，Pillow 合成的暖色宣纸 + 云海 + 竹棚小铺，脚本 `scripts/gen_shop_scene.py`）。
 - 商品图：`assets/numbers/goods/<apple|pear|jujube|peach|candy>.png`（待补，v0 用 emoji 兜底）。
 - 贝币图：`assets/numbers/coins/<1|2|5|10>.png`（待补，v0 用圆形数字徽章兜底）。
 - 童谣 TTS：`assets/voice/num_<id>.mp3`（待补，v0 沿用系统 TTS 或静音，字幕保留）。
