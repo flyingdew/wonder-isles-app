@@ -299,13 +299,11 @@ class UpdateService {
     DownloadProgress? onProgress,
     CancelToken? cancelToken,
   }) async {
-    final List<Directory>? cacheDirs = await getExternalCacheDirectories();
-    final Directory? extCache =
-        (cacheDirs != null && cacheDirs.isNotEmpty) ? cacheDirs.first : null;
-    if (extCache == null) {
-      throw StateError('external cache dir unavailable');
-    }
-    final Directory dir = Directory('${extCache.path}/updates');
+    // 用内部私有 cache（getCacheDir()），open_filex 4.5.x 在 external 路径上
+    // 会误报需要 MANAGE_EXTERNAL_STORAGE；内部 cache 走 FileProvider content://
+    // URI 交给 PackageInstaller，系统安装器正常受理，也不需要额外权限。
+    final Directory baseCache = await getTemporaryDirectory();
+    final Directory dir = Directory('${baseCache.path}/updates');
     if (!await dir.exists()) await dir.create(recursive: true);
 
     final File target = File('${dir.path}/${asset.name}');

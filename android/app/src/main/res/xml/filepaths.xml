@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <!-- 对应 getExternalCacheDir()，path_provider 的 getExternalCacheDirectories().first -->
-    <external-cache-path name="apk_cache" path="."/>
+    <!-- 对应 getCacheDir()，即 Flutter 的 getTemporaryDirectory()。
+         用内部 cache 而非 external-cache，避免 open_filex 4.5.x 在
+         Android 11+ 上把 external 路径误判为需要 MANAGE_EXTERNAL_STORAGE。 -->
+    <cache-path name="apk_cache" path="."/>
+    <!-- 保留 external-cache 兼容老版本（0.1.9 之前下载到了这里的用户），
+         触达时也能签发 content:// URI，避免升级期间残留文件读取失败。 -->
+    <external-cache-path name="apk_cache_legacy" path="."/>
 </paths>
