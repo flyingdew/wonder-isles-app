@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/achievement.dart';
 import '../data/character.dart';
 import '../data/character_repository.dart';
+import '../data/number_repository.dart';
 
 /// 本地存档：记录点亮过的字 id、每字复访次数、已完成场景诗、成就与连续访问天数。
 class ProgressStore extends ChangeNotifier {
@@ -23,6 +24,7 @@ class ProgressStore extends ChangeNotifier {
   final Set<String> _achievements = <String>{};
   SharedPreferences? _prefs;
   CharacterRepository? _repo;
+  NumberRepository? _numRepo;
   DateTime? _lastVisit;
   int _streak = 0;
   final Set<String> _numLit = <String>{};
@@ -72,6 +74,11 @@ class ProgressStore extends ChangeNotifier {
   /// 由 main() 在字库加载完后注入，成就评估需要按场景/整章计数。
   void attachRepository(CharacterRepository repo) {
     _repo = repo;
+  }
+
+  /// 由 main() 在数之岛字库加载完后注入，用于评估 numbers_all 成就。
+  void attachNumberRepository(NumberRepository repo) {
+    _numRepo = repo;
   }
 
   bool isLit(String id) => _lit.contains(id);
@@ -162,6 +169,15 @@ class ProgressStore extends ChangeNotifier {
     }
     if (_poems.contains('boss')) tryUnlock('poem_boss');
     if (_streak >= 3) tryUnlock('streak_3');
+
+    if (_numLit.isNotEmpty) tryUnlock('numbers_first');
+    if (_numRepo != null) {
+      final Set<String> all = _numRepo!.all.map((e) => e.id).toSet();
+      if (all.isNotEmpty && all.every(_numLit.contains)) {
+        tryUnlock('numbers_all');
+      }
+    }
+    if (_poems.contains('numbers_isle')) tryUnlock('numbers_rhyme');
 
     if (newly.isNotEmpty) {
       await _prefs?.setStringList(_kAchievements, _achievements.toList());

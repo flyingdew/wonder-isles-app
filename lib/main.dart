@@ -47,6 +47,7 @@ Future<void> _bootstrap() async {
     voice.load(),
   ]);
   progress.attachRepository(repository);
+  progress.attachNumberRepository(numberRepository);
 
   runApp(WonderIslesApp(
     repository: repository,

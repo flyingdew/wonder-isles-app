@@ -5,6 +5,8 @@ import '../app_theme.dart';
 import '../data/achievement.dart';
 import '../data/character.dart';
 import '../data/character_repository.dart';
+import '../data/number_entry.dart';
+import '../data/number_repository.dart';
 import '../data/parent_tips.dart';
 import '../data/poems.dart';
 import '../services/progress_store.dart';
@@ -21,6 +23,7 @@ class ParentDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CharacterRepository repo = context.read<CharacterRepository>();
+    final NumberRepository numRepo = context.read<NumberRepository>();
     final ProgressStore progress = context.watch<ProgressStore>();
 
     final Map<String, int> visits = progress.allVisits;
@@ -35,6 +38,19 @@ class ParentDashboardPage extends StatelessWidget {
         .where((SceneId s) => progress.isPoemDone(s.key))
         .length;
     final bool bossDone = progress.isPoemDone(kBossPoem.sceneKey);
+
+    // 数之岛：最爱数字 / 开张日数 / 顺口溜。
+    final Map<String, int> numVisits = progress.allNumberVisits;
+    final List<NumberEntry> numRanked = numRepo.all
+        .where((NumberEntry e) => (numVisits[e.id] ?? 0) > 0)
+        .toList()
+      ..sort((NumberEntry a, NumberEntry b) =>
+          (numVisits[b.id] ?? 0).compareTo(numVisits[a.id] ?? 0));
+    final NumberEntry? favoriteNumber =
+        numRanked.isEmpty ? null : numRanked.first;
+    final int numberLit = progress.numberLitCount;
+    final int numberTotal = numRepo.all.length;
+    final bool numberPoemDone = progress.isPoemDone('numbers_isle');
 
     return Scaffold(
       appBar: AppBar(
@@ -59,6 +75,14 @@ class ParentDashboardPage extends StatelessWidget {
             lit: progress.litCount,
             scenePoems: scenePoems,
             bossDone: bossDone,
+          ),
+          const SizedBox(height: 16),
+          _NumbersIsleCard(
+            favorite: favoriteNumber,
+            lit: numberLit,
+            total: numberTotal,
+            poemDone: numberPoemDone,
+            visits: numVisits,
           ),
           const SizedBox(height: 16),
           _FavoriteCard(favorite: favorite, visits: visits),
@@ -429,3 +453,118 @@ class _AchievementRow extends StatelessWidget {
   }
 }
 
+
+class _NumbersIsleCard extends StatelessWidget {
+  const _NumbersIsleCard({
+    required this.favorite,
+    required this.lit,
+    required this.total,
+    required this.poemDone,
+    required this.visits,
+  });
+
+  final NumberEntry? favorite;
+  final int lit;
+  final int total;
+  final bool poemDone;
+  final Map<String, int> visits;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Panel(
+      title: '数之岛',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          _StatRow(
+            icon: Icons.storefront_outlined,
+            label: '已开张的小铺',
+            value: '$lit / $total',
+          ),
+          const SizedBox(height: 10),
+          _StatRow(
+            icon: Icons.music_note_outlined,
+            label: '章末顺口溜',
+            value: poemDone ? '已完成' : '未完成',
+          ),
+          const SizedBox(height: 14),
+          _FavoriteNumberBlock(favorite: favorite, visits: visits),
+        ],
+      ),
+    );
+  }
+}
+
+class _FavoriteNumberBlock extends StatelessWidget {
+  const _FavoriteNumberBlock({required this.favorite, required this.visits});
+  final NumberEntry? favorite;
+  final Map<String, int> visits;
+
+  @override
+  Widget build(BuildContext context) {
+    final NumberEntry? n = favorite;
+    if (n == null) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 2),
+        child: Text(
+          '还没走过任何一天的小铺，等第一次开张之后这里会显示最爱的数字。',
+          style: TextStyle(color: InkPalette.inkSoft, height: 1.5),
+        ),
+      );
+    }
+    return Row(
+      children: <Widget>[
+        Container(
+          width: 64,
+          height: 64,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: InkPalette.glow.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(14),
+            border:
+                Border.all(color: InkPalette.ink.withValues(alpha: 0.3)),
+          ),
+          child: Text(
+            n.char,
+            style: const TextStyle(
+              fontSize: 34,
+              fontWeight: FontWeight.w700,
+              color: InkPalette.ink,
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                '${n.char} · ${n.pinyin} · ${n.value}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: InkPalette.ink,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '回访 ${visits[n.id] ?? 0} 次 · 第${n.day}天',
+                style: const TextStyle(color: InkPalette.inkSoft),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                n.rhyme,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: InkPalette.inkSoft,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

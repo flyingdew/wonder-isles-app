@@ -15,7 +15,7 @@ class Achievement {
   final IconData icon;
 }
 
-/// 字之岛章节的成就清单。评估逻辑在 `ProgressStore._evaluate` 中。
+/// 奇思岛的成就清单。评估逻辑在 `ProgressStore._evaluate` 中。
 ///
 /// 顺序即家长视图中展示顺序，也影响弹窗中多条同时解锁时的先后。
 const List<Achievement> kAchievements = <Achievement>[
@@ -48,6 +48,24 @@ const List<Achievement> kAchievements = <Achievement>[
     title: '三日结伴',
     description: '连续三天来到奇思岛。',
     icon: Icons.wb_sunny_outlined,
+  ),
+  Achievement(
+    id: 'numbers_first',
+    title: '小铺开张',
+    description: '在数之岛开张了第一天的小铺。',
+    icon: Icons.storefront_outlined,
+  ),
+  Achievement(
+    id: 'numbers_all',
+    title: '数之岛守护者',
+    description: '走完了数之岛五天的小铺。',
+    icon: Icons.stars_outlined,
+  ),
+  Achievement(
+    id: 'numbers_rhyme',
+    title: '顺口成谣',
+    description: '在数之岛念完了章末的顺口溜。',
+    icon: Icons.music_note_outlined,
   ),
 ];
 
