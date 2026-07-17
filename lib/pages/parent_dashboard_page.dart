@@ -51,6 +51,7 @@ class ParentDashboardPage extends StatelessWidget {
     final int numberLit = progress.numberLitCount;
     final int numberTotal = numRepo.all.length;
     final bool numberPoemDone = progress.isPoemDone('numbers_isle');
+    final bool numberMathDone = progress.isNumberMathDone;
 
     return Scaffold(
       appBar: AppBar(
@@ -82,6 +83,7 @@ class ParentDashboardPage extends StatelessWidget {
             lit: numberLit,
             total: numberTotal,
             poemDone: numberPoemDone,
+            mathDone: numberMathDone,
             visits: numVisits,
           ),
           const SizedBox(height: 16),
@@ -460,6 +462,7 @@ class _NumbersIsleCard extends StatelessWidget {
     required this.lit,
     required this.total,
     required this.poemDone,
+    required this.mathDone,
     required this.visits,
   });
 
@@ -467,6 +470,7 @@ class _NumbersIsleCard extends StatelessWidget {
   final int lit;
   final int total;
   final bool poemDone;
+  final bool mathDone;
   final Map<String, int> visits;
 
   @override
@@ -480,6 +484,12 @@ class _NumbersIsleCard extends StatelessWidget {
             icon: Icons.storefront_outlined,
             label: '已开张的小铺',
             value: '$lit / $total',
+          ),
+          const SizedBox(height: 10),
+          _StatRow(
+            icon: Icons.calculate_outlined,
+            label: '小铺算术',
+            value: mathDone ? '已过关' : '未过关',
           ),
           const SizedBox(height: 10),
           _StatRow(

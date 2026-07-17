@@ -8,6 +8,7 @@ import '../services/progress_store.dart';
 import '../services/voice_service.dart';
 import '../widgets/number_glyph.dart';
 import 'number_flow_page.dart';
+import 'number_math_page.dart';
 import 'number_poem_page.dart';
 
 /// 数之岛（第二章） · 云上小铺。
@@ -37,6 +38,7 @@ class _NumberIslePageState extends State<NumberIslePage> {
     final List<NumberEntry> entries = repo.all;
     final bool allDone =
         entries.every((NumberEntry e) => progress.isNumberLit(e.id));
+    final bool mathDone = progress.isNumberMathDone;
     final bool poemDone =
         progress.isPoemDone(NumberPoemPage.sceneKey);
 
@@ -71,6 +73,18 @@ class _NumberIslePageState extends State<NumberIslePage> {
             const SizedBox(height: 12),
           ],
           const SizedBox(height: 8),
+          _MathEntry(
+            unlocked: allDone,
+            done: mathDone,
+            onEnter: () async {
+              await Navigator.of(context).push(MaterialPageRoute<bool>(
+                builder: (_) => const NumberMathPage(),
+              ));
+              if (!mounted) return;
+              setState(() {});
+            },
+          ),
+          const SizedBox(height: 12),
           _RhymeEntry(
             done: progress.numberLitCount,
             total: entries.length,
@@ -228,6 +242,78 @@ class _DayBadge extends StatelessWidget {
             fontWeight: FontWeight.w700,
             color: InkPalette.ink,
           )),
+    );
+  }
+}
+
+class _MathEntry extends StatelessWidget {
+  const _MathEntry({
+    required this.unlocked,
+    required this.done,
+    required this.onEnter,
+  });
+  final bool unlocked;
+  final bool done;
+  final VoidCallback onEnter;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color bg = done
+        ? InkPalette.glow.withValues(alpha: 0.9)
+        : (unlocked ? InkPalette.ochre : InkPalette.paperDeep);
+    final Color fg = done ? InkPalette.ink : InkPalette.paper;
+    final Color fgDim = done
+        ? InkPalette.inkSoft
+        : InkPalette.paper.withValues(alpha: 0.75);
+    final IconData icon = done
+        ? Icons.emoji_events_outlined
+        : (unlocked
+            ? Icons.calculate_outlined
+            : Icons.lock_outline);
+    final String label = done
+        ? '再算一遍'
+        : (unlocked
+            ? '加减合练 · 六题过关'
+            : '完成 5 天后开启');
+    return Material(
+      color: bg,
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: unlocked ? onEnter : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Row(
+            children: <Widget>[
+              Icon(icon,
+                  color: unlocked ? fg : InkPalette.inkSoft, size: 26),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('小铺算术 · 加减合练',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: unlocked ? fg : InkPalette.ink,
+                          letterSpacing: 2,
+                        )),
+                    const SizedBox(height: 4),
+                    Text(label,
+                        style: TextStyle(
+                          color: unlocked ? fgDim : InkPalette.inkSoft,
+                          fontSize: 13,
+                        )),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right,
+                  color: unlocked ? fg : InkPalette.inkSoft),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

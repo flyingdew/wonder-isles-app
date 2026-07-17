@@ -17,6 +17,7 @@ class ProgressStore extends ChangeNotifier {
   // ---- 数之岛（第二章） ----
   static const String _kNumLit = 'wonder_isles.numbers.lit';
   static const String _kNumVisitPrefix = 'wonder_isles.numbers.visit.';
+  static const String _kNumMathDone = 'wonder_isles.numbers.math_done';
 
   final Set<String> _lit = <String>{};
   final Map<String, int> _visits = <String, int>{};
@@ -29,6 +30,7 @@ class ProgressStore extends ChangeNotifier {
   int _streak = 0;
   final Set<String> _numLit = <String>{};
   final Map<String, int> _numVisits = <String, int>{};
+  bool _numMathDone = false;
 
   Set<String> get litIds => Set<String>.unmodifiable(_lit);
   int get litCount => _lit.length;
@@ -40,6 +42,7 @@ class ProgressStore extends ChangeNotifier {
   int get numberLitCount => _numLit.length;
   Map<String, int> get allNumberVisits =>
       Map<String, int>.unmodifiable(_numVisits);
+  bool get isNumberMathDone => _numMathDone;
 
   Future<void> load() async {
     _prefs = await SharedPreferences.getInstance();
@@ -57,6 +60,7 @@ class ProgressStore extends ChangeNotifier {
       ..clear()
       ..addAll(_prefs?.getStringList(_kNumLit) ?? <String>[]);
     _numVisits.clear();
+    _numMathDone = _prefs?.getBool(_kNumMathDone) ?? false;
     for (final String key in _prefs?.getKeys() ?? const <String>{}) {
       if (key.startsWith(_kVisitPrefix)) {
         _visits[key.substring(_kVisitPrefix.length)] =
@@ -108,6 +112,15 @@ class ProgressStore extends ChangeNotifier {
     notifyListeners();
     return _evaluate();
   }
+  Future<List<Achievement>> markNumberMathDone() async {
+    if (!_numMathDone) {
+      _numMathDone = true;
+      await _prefs?.setBool(_kNumMathDone, true);
+      notifyListeners();
+    }
+    return _evaluate();
+  }
+
   Future<List<Achievement>> markPoemDone(String sceneKey) async {
     if (_poems.add(sceneKey)) {
       await _prefs?.setStringList(_kPoems, _poems.toList());
@@ -178,6 +191,7 @@ class ProgressStore extends ChangeNotifier {
       }
     }
     if (_poems.contains('numbers_isle')) tryUnlock('numbers_rhyme');
+    if (_numMathDone) tryUnlock('numbers_math');
 
     if (newly.isNotEmpty) {
       await _prefs?.setStringList(_kAchievements, _achievements.toList());
@@ -191,6 +205,7 @@ class ProgressStore extends ChangeNotifier {
     _visits.clear();
     _numLit.clear();
     _numVisits.clear();
+    _numMathDone = false;
     _poems.clear();
     _achievements.clear();
     _lastVisit = null;

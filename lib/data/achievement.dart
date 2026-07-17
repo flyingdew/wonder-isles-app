@@ -62,6 +62,12 @@ const List<Achievement> kAchievements = <Achievement>[
     icon: Icons.stars_outlined,
   ),
   Achievement(
+    id: 'numbers_math',
+    title: '小铺算术',
+    description: '在数之岛的算术小铺里做对了六道加减题。',
+    icon: Icons.calculate_outlined,
+  ),
+  Achievement(
     id: 'numbers_rhyme',
     title: '顺口成谣',
     description: '在数之岛念完了章末的顺口溜。',

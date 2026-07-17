@@ -39,7 +39,7 @@
 ## 待处理内容
 
 - v0：数字 1–5 的三步循环 + 章末顺口溜 + 岛屿入口。
-- v1：加减法（3+2、5-2）作为"顾客砍价"或"合并订单"的变体。
+- v1：小铺算术（加减合练） · 6 道加减题，值域 [0,5]，全 5 天点亮后开放。落地在 NumberMathPage + lib/data/number_math.dart。
 - v2：分数与估算（半个苹果、一把糖）。
 
 ## 存档 key 约定
@@ -47,6 +47,7 @@
 - 点亮字符：`wonder_isles.numbers.lit`（与字之岛的 `wonder_isles.lit` 隔离，避免污染 20/20 计数）。
 - 顺口溜完成：沿用 `wonder_isles.poems`，key 用 `numbers_isle`。
 - 拜访计数：`wonder_isles.numbers.visit.<id>`。
+- 算术小铺完成：`wonder_isles.numbers.math_done`（bool）。
 
 ## 资源占位
 
