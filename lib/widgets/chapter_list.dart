@@ -15,6 +15,7 @@ class ChapterEntry {
     required this.status,
     this.onTap,
     this.badge,
+    this.emoji,
   });
 
   final String title;
@@ -23,17 +24,17 @@ class ChapterEntry {
   final Color accent;
   final ChapterStatus status;
   final VoidCallback? onTap;
-  /// 右上角可选徽标，如"点亮 8/20"或"新"。
   final String? badge;
+  final String? emoji;
 
   bool get enabled =>
       status != ChapterStatus.comingSoon && onTap != null;
 }
 
-/// 首页岛屿列表：一列卡片，最上一张最主，后面依次跟随。
+/// 首页岛屿列表：亲子活泼版。
 ///
-/// 视觉沿用之前的 _ChapterCard：主图左侧图标底色 = accent，
-/// "敬请期待"的卡片降透明度、去 chevron，点击不响应。
+/// 卡片：奶白底 + 18 圆角 + 淡阴影；左侧圆角方块图标区用 accent 15% 底色；
+/// 右上角 pill 状态章根据 status 变色。
 class ChapterList extends StatelessWidget {
   const ChapterList({super.key, required this.entries});
   final List<ChapterEntry> entries;
@@ -44,7 +45,7 @@ class ChapterList extends StatelessWidget {
       children: <Widget>[
         for (int i = 0; i < entries.length; i++) ...<Widget>[
           _ChapterCard(entry: entries[i]),
-          if (i < entries.length - 1) const SizedBox(height: 10),
+          if (i < entries.length - 1) const SizedBox(height: 12),
         ],
       ],
     );
@@ -58,81 +59,88 @@ class _ChapterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool enabled = entry.enabled;
-    final Color cardBg = enabled
-        ? InkPalette.paperDeep
-        : InkPalette.paperDeep.withValues(alpha: 0.55);
-    return Material(
-      color: cardBg,
-      borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: enabled ? entry.onTap : null,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: entry.accent.withValues(alpha: enabled ? 0.15 : 0.08),
-                  borderRadius: BorderRadius.circular(10),
+    final Color cardBg = enabled ? Colors.white : Colors.white.withValues(alpha: 0.72);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: InkPalette.ink.withValues(alpha: enabled ? 0.06 : 0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: enabled ? entry.onTap : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 56,
+                  height: 56,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: entry.accent.withValues(alpha: enabled ? 0.18 : 0.10),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: entry.emoji != null
+                      ? Text(entry.emoji!, style: const TextStyle(fontSize: 30))
+                      : Icon(entry.icon,
+                          color: entry.accent
+                              .withValues(alpha: enabled ? 1 : 0.5),
+                          size: 28),
                 ),
-                child: Icon(entry.icon,
-                    color: entry.accent
-                        .withValues(alpha: enabled ? 1 : 0.5),
-                    size: 24),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Flexible(
-                          child: Text(entry.title,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: enabled
-                                    ? InkPalette.ink
-                                    : InkPalette.inkSoft,
-                                letterSpacing: 2,
-                              )),
-                        ),
-                        if (entry.badge != null) ...<Widget>[
-                          const SizedBox(width: 8),
-                          _StatusBadge(
-                            text: entry.badge!,
-                            status: entry.status,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(entry.title,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: enabled
+                                      ? InkPalette.ink
+                                      : InkPalette.inkSoft,
+                                  letterSpacing: 1.5,
+                                )),
                           ),
-                        ] else ...<Widget>[
                           const SizedBox(width: 8),
                           _StatusBadge(
-                            text: _defaultBadge(entry.status),
+                            text: entry.badge ?? _defaultBadge(entry.status),
                             status: entry.status,
+                            accent: entry.accent,
                           ),
                         ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(entry.subtitle,
-                        style: TextStyle(
-                          color: InkPalette.inkSoft
-                              .withValues(alpha: enabled ? 1 : 0.6),
-                          letterSpacing: 1,
-                        )),
-                  ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(entry.subtitle,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: InkPalette.inkSoft
+                                .withValues(alpha: enabled ? 0.9 : 0.6),
+                            letterSpacing: 0.6,
+                          )),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                enabled ? Icons.chevron_right : Icons.lock_outline,
-                color: InkPalette.inkSoft
-                    .withValues(alpha: enabled ? 1 : 0.7),
-              ),
-            ],
+                if (!enabled)
+                  const Text('🔒', style: TextStyle(fontSize: 18))
+                else
+                  Icon(Icons.chevron_right,
+                      color: InkPalette.inkSoft.withValues(alpha: 0.7)),
+              ],
+            ),
           ),
         ),
       ),
@@ -152,9 +160,14 @@ class _ChapterCard extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.text, required this.status});
+  const _StatusBadge({
+    required this.text,
+    required this.status,
+    required this.accent,
+  });
   final String text;
   final ChapterStatus status;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
@@ -162,20 +175,20 @@ class _StatusBadge extends StatelessWidget {
     late Color bg;
     switch (status) {
       case ChapterStatus.playable:
-        fg = InkPalette.reed;
-        bg = InkPalette.reed.withValues(alpha: 0.15);
+        fg = accent;
+        bg = accent.withValues(alpha: 0.18);
         break;
       case ChapterStatus.prototype:
-        fg = InkPalette.ochre;
-        bg = InkPalette.ochre.withValues(alpha: 0.18);
+        fg = accent;
+        bg = accent.withValues(alpha: 0.14);
         break;
       case ChapterStatus.comingSoon:
         fg = InkPalette.inkSoft;
-        bg = InkPalette.paper.withValues(alpha: 0.7);
+        bg = InkPalette.inkSoft.withValues(alpha: 0.10);
         break;
     }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(999),
@@ -185,7 +198,7 @@ class _StatusBadge extends StatelessWidget {
             color: fg,
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            letterSpacing: 1,
+            letterSpacing: 0.5,
           )),
     );
   }
