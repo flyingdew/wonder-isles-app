@@ -12,6 +12,7 @@ import '../services/voice_service.dart';
 import '../services/update_service.dart';
 import '../widgets/achievement_dialog.dart';
 import '../widgets/app_version.dart';
+import '../widgets/chapter_list.dart';
 import '../widgets/update_dialog.dart';
 import 'island_map_page.dart';
 import 'number_isle_page.dart';
@@ -95,31 +96,51 @@ class _HomePageState extends State<HomePage> {
                           ),
                           SizedBox(height: tight ? 24 : 0),
                           if (!tight) const Spacer(),
-                          _LitBadge(count: progress.litCount),
                           SizedBox(height: tight ? 14 : 20),
-                          _ChapterCard(
-                            title: '第一章 · 字之岛',
-                            subtitle: '万物有形',
-                            icon: Icons.brush_outlined,
-                            accent: InkPalette.vermilion,
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute<void>(
-                                builder: (_) => const IslandMapPage(),
-                              ));
-                            },
-                          ),
-                          const SizedBox(height: 10),
-                          _ChapterCard(
-                            title: '第二章 · 数之岛',
-                            subtitle: '云上小铺 · 原型',
-                            icon: Icons.storefront_outlined,
-                            accent: InkPalette.ochre,
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute<void>(
-                                builder: (_) => const NumberIslePage(),
-                              ));
-                            },
-                          ),
+                          ChapterList(entries: <ChapterEntry>[
+                            ChapterEntry(
+                              title: '第一章 · 字之岛',
+                              subtitle: '万物有形',
+                              icon: Icons.brush_outlined,
+                              accent: InkPalette.vermilion,
+                              status: ChapterStatus.playable,
+                              badge: '点亮 ${progress.litCount} / 20',
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute<void>(
+                                  builder: (_) => const IslandMapPage(),
+                                ));
+                              },
+                            ),
+                            ChapterEntry(
+                              title: '第二章 · 数之岛',
+                              subtitle: '云上小铺 · 一二三四五',
+                              icon: Icons.storefront_outlined,
+                              accent: InkPalette.ochre,
+                              status: ChapterStatus.prototype,
+                              badge: progress.numberLitCount > 0
+                                  ? '开张 ${progress.numberLitCount} / 5'
+                                  : '原型',
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute<void>(
+                                  builder: (_) => const NumberIslePage(),
+                                ));
+                              },
+                            ),
+                            const ChapterEntry(
+                              title: '第三章 · 机关岛',
+                              subtitle: '重力 · 杠杆 · 齿轮',
+                              icon: Icons.settings_outlined,
+                              accent: InkPalette.dusk,
+                              status: ChapterStatus.comingSoon,
+                            ),
+                            const ChapterEntry(
+                              title: '第四章 · 故事岛',
+                              subtitle: '词句 · 想象 · 续写',
+                              icon: Icons.menu_book_outlined,
+                              accent: InkPalette.reed,
+                              status: ChapterStatus.comingSoon,
+                            ),
+                          ]),
                           const SizedBox(height: 12),
                           Align(
                             alignment: Alignment.centerLeft,
@@ -156,99 +177,7 @@ class _HomePageState extends State<HomePage> {
 
 }
 
-class _ChapterCard extends StatelessWidget {
-  const _ChapterCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.accent,
-    required this.onTap,
-  });
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color accent;
-  final VoidCallback onTap;
 
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: InkPalette.paperDeep,
-      borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: accent, size: 24),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: InkPalette.ink,
-                          letterSpacing: 2,
-                        )),
-                    const SizedBox(height: 2),
-                    Text(subtitle,
-                        style: const TextStyle(
-                          color: InkPalette.inkSoft,
-                          letterSpacing: 1,
-                        )),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right, color: InkPalette.inkSoft),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-class _LitBadge extends StatelessWidget {
-  const _LitBadge({required this.count});
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: InkPalette.paperDeep,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          const Icon(Icons.wb_sunny_outlined,
-              size: 20, color: InkPalette.vermilion),
-          const SizedBox(width: 8),
-          Text('已点亮 $count / 20 字',
-              style: const TextStyle(
-                color: InkPalette.ink,
-                fontWeight: FontWeight.w500,
-              )),
-        ],
-      ),
-    );
-  }
-}
 
 class _PaperBackdrop extends StatelessWidget {
   const _PaperBackdrop();

@@ -71,7 +71,7 @@
 - [x] 第二步"配一配"：Draggable / DragTarget，箩筐上限校验 + 分层 haptic + 拒收轻抖
 - [x] 第三步"找零"：1 / 2 / 5 面值点选累加，超额回弹 + 撤一枚 + chime
 - [x] 章末顺口溜页：新 `NumberPoemPage` 逐行呈现 + markPoemDone("numbers_isle")
-- [ ] Home 页把"章节列表"抽成通用 ChapterList（为机关岛/故事岛留位）
+- [x] Home 页抽成通用 ChapterList（机关岛/故事岛以"敬请期待"卡就位）
 - [ ] 商品/贝币的水墨插图（v0 用色块 + 汉字兜底）
 - [ ] 童谣 TTS（v0 静默，字幕保留）
 ## 后续版本（不排入 v1）
