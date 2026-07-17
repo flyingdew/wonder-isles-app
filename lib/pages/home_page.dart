@@ -116,10 +116,16 @@ class _HomePageState extends State<HomePage> {
                               subtitle: '云上小铺 · 一二三四五',
                               icon: Icons.storefront_outlined,
                               accent: InkPalette.ochre,
-                              status: ChapterStatus.prototype,
-                              badge: progress.numberLitCount > 0
-                                  ? '开张 ${progress.numberLitCount} / 5'
-                                  : '原型',
+                              status: (progress.numberLitCount >= 5)
+                                  ? ChapterStatus.playable
+                                  : ChapterStatus.prototype,
+                              badge: (progress.numberLitCount >= 5 &&
+                                      progress.isNumberMathDone &&
+                                      progress.isPoemDone('numbers_isle'))
+                                  ? '圆满'
+                                  : (progress.numberLitCount > 0
+                                      ? '开张 ${progress.numberLitCount} / 5'
+                                      : '原型'),
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute<void>(
                                   builder: (_) => const NumberIslePage(),

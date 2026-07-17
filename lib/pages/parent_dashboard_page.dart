@@ -475,11 +475,16 @@ class _NumbersIsleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool full = lit >= total && mathDone && poemDone;
     return _Panel(
       title: '数之岛',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          if (full) ...<Widget>[
+            const _FullChapterPill(),
+            const SizedBox(height: 12),
+          ],
           _StatRow(
             icon: Icons.storefront_outlined,
             label: '已开张的小铺',
@@ -575,6 +580,40 @@ class _FavoriteNumberBlock extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _FullChapterPill extends StatelessWidget {
+  const _FullChapterPill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: InkPalette.glow.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+            color: InkPalette.ochre.withValues(alpha: 0.9), width: 1),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(Icons.emoji_events_outlined,
+              size: 16, color: InkPalette.ink),
+          SizedBox(width: 6),
+          Text(
+            '本章圆满 · 5 日 + 算术 + 顺口溜',
+            style: TextStyle(
+              color: InkPalette.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
