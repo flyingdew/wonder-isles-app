@@ -5,14 +5,13 @@ import '../app_theme.dart';
 import '../data/number_entry.dart';
 import '../services/progress_store.dart';
 import '../services/voice_service.dart';
-import '../widgets/count_stage.dart';
 import '../widgets/make_stage.dart';
 import '../widgets/change_stage.dart';
 import '../widgets/number_glyph.dart';
 
-enum NumberFlowStep { count, make, change, done }
+enum NumberFlowStep { make, change, done }
 
-/// 数之岛一局：数一数 → 配一配 → 找零 → 点亮。
+/// 数之岛一局：配一配 → 找零 → 点亮。
 class NumberFlowPage extends StatefulWidget {
   const NumberFlowPage({super.key, required this.entry});
   final NumberEntry entry;
@@ -22,7 +21,7 @@ class NumberFlowPage extends StatefulWidget {
 }
 
 class _NumberFlowPageState extends State<NumberFlowPage> {
-  NumberFlowStep _step = NumberFlowStep.count;
+  NumberFlowStep _step = NumberFlowStep.make;
   VoiceService? _voice;
 
   @override
@@ -55,11 +54,6 @@ class _NumberFlowPageState extends State<NumberFlowPage> {
 
   Widget _buildStage(NumberEntry e) {
     switch (_step) {
-      case NumberFlowStep.count:
-        return CountStage(
-          entry: e,
-          onDone: () => setState(() => _step = NumberFlowStep.make),
-        );
       case NumberFlowStep.make:
         return MakeStage(
           entry: e,
@@ -94,8 +88,8 @@ class _StepIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const List<String> labels = <String>['数', '配', '找'];
-    final int idx = step.index.clamp(0, 2);
+    const List<String> labels = <String>['配', '找'];
+    final int idx = step.index.clamp(0, 1);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[

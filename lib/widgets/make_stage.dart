@@ -49,6 +49,11 @@ class _MakeStageState extends State<MakeStage>
       vsync: this,
       duration: const Duration(milliseconds: 320),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // 童谣一进场就轻声起头，给数字感的锚定（原本挂在 CountStage 上）。
+      context.read<VoiceService>().play(widget.entry.rhymeVoiceAsset);
+    });
   }
 
   @override
