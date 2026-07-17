@@ -5,7 +5,7 @@
     "char": "一",
     "pinyin": "yī",
     "day": 1,
-    "good": { "label": "苹", "name": "苹果", "color": "vermilion" },
+    "good": { "label": "苹", "name": "苹果", "asset": "apple", "color": "vermilion" },
     "rhyme": "一只小雀落枝头，独自轻轻叫一声。",
     "change": { "given": 2, "price": 1 }
   },
@@ -15,7 +15,7 @@
     "char": "二",
     "pinyin": "èr",
     "day": 2,
-    "good": { "label": "梨", "name": "梨", "color": "reed" },
+    "good": { "label": "梨", "name": "梨", "asset": "pear", "color": "reed" },
     "rhyme": "两只黄鹂鸣翠柳，你一言来我一语。",
     "change": { "given": 5, "price": 2 }
   },
@@ -25,7 +25,7 @@
     "char": "三",
     "pinyin": "sān",
     "day": 3,
-    "good": { "label": "枣", "name": "枣", "color": "ochre" },
+    "good": { "label": "枣", "name": "枣", "asset": "jujube", "color": "ochre" },
     "rhyme": "三只小鸭排成排，一二三，走得开。",
     "change": { "given": 5, "price": 3 }
   },
@@ -35,7 +35,7 @@
     "char": "四",
     "pinyin": "sì",
     "day": 4,
-    "good": { "label": "桃", "name": "桃", "color": "vermilion" },
+    "good": { "label": "桃", "name": "桃", "asset": "peach", "color": "vermilion" },
     "rhyme": "四扇窗户四扇门，风一吹，都开门。",
     "change": { "given": 5, "price": 4 }
   },
@@ -45,7 +45,7 @@
     "char": "五",
     "pinyin": "wǔ",
     "day": 5,
-    "good": { "label": "糖", "name": "糖", "color": "dusk" },
+    "good": { "label": "糖", "name": "糖", "asset": "candy", "color": "dusk" },
     "rhyme": "五个指头一只手，握一握，拳头有。",
     "change": { "given": 10, "price": 5 }
   }

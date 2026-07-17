@@ -23,6 +23,16 @@ class CountStage extends StatefulWidget {
 class _CountStageState extends State<CountStage> {
   final Set<int> _tapped = <int>{};
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // 童谣一进场就轻声起头，孩子操作时给数字感的锚定。
+      context.read<VoiceService>().play(widget.entry.rhymeVoiceAsset);
+    });
+  }
+
   bool get _allTapped => _tapped.length >= widget.entry.value;
 
   void _handleTap(int i) {
@@ -64,6 +74,7 @@ class _CountStageState extends State<CountStage> {
                       children: <Widget>[
                         for (int i = 0; i < e.value; i++)
                           _CountItem(
+                            assetPath: e.good.assetPath,
                             label: e.good.label,
                             colorKey: e.good.colorKey,
                             tapped: _tapped.contains(i),
@@ -126,11 +137,13 @@ class _CountBadge extends StatelessWidget {
 
 class _CountItem extends StatelessWidget {
   const _CountItem({
+    required this.assetPath,
     required this.label,
     required this.colorKey,
     required this.tapped,
     required this.onTap,
   });
+  final String assetPath;
   final String label;
   final String colorKey;
   final bool tapped;
@@ -160,6 +173,7 @@ class _CountItem extends StatelessWidget {
                 : const <BoxShadow>[],
           ),
           child: NumberGlyph(
+            assetPath: assetPath,
             label: label,
             colorKey: colorKey,
             size: 72,

@@ -285,6 +285,7 @@ class _ShelfItem extends StatelessWidget {
   Widget build(BuildContext context) {
     if (taken) {
       return NumberGlyph(
+        assetPath: entry.good.assetPath,
         label: entry.good.label,
         colorKey: entry.good.colorKey,
         size: 56,
@@ -292,6 +293,7 @@ class _ShelfItem extends StatelessWidget {
       );
     }
     final NumberGlyph glyph = NumberGlyph(
+      assetPath: entry.good.assetPath,
       label: entry.good.label,
       colorKey: entry.good.colorKey,
       size: 56,
@@ -301,12 +303,14 @@ class _ShelfItem extends StatelessWidget {
       feedback: Material(
         color: Colors.transparent,
         child: NumberGlyph(
+          assetPath: entry.good.assetPath,
           label: entry.good.label,
           colorKey: entry.good.colorKey,
           size: 64,
         ),
       ),
       childWhenDragging: NumberGlyph(
+        assetPath: entry.good.assetPath,
         label: entry.good.label,
         colorKey: entry.good.colorKey,
         size: 56,
@@ -408,6 +412,7 @@ class _Basket extends StatelessWidget {
                               GestureDetector(
                                 onTap: () => onTapChip(i),
                                 child: NumberGlyph(
+                                  assetPath: entry.good.assetPath,
                                   label: entry.good.label,
                                   colorKey: entry.good.colorKey,
                                   size: 52,

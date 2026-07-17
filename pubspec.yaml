@@ -37,6 +37,8 @@ flutter:
   assets:
     - assets/data/characters.json
     - assets/data/numbers.json
+    - assets/numbers/goods/
+    - assets/numbers/coins/
     - assets/scenes/
     - assets/voice/
     - assets/bgm/

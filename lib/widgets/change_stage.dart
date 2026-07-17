@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../app_theme.dart';
 import '../data/number_entry.dart';
 import '../services/voice_service.dart';
+import 'number_glyph.dart';
 
 /// 数之岛第三步：找零。
 ///
@@ -315,33 +316,7 @@ class _BigCoin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 64,
-      height: 64,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: InkPalette.ochre.withValues(alpha: 0.9),
-        border: Border.all(color: InkPalette.ink.withValues(alpha: 0.4), width: 2),
-        boxShadow: glow
-            ? <BoxShadow>[
-                BoxShadow(
-                  color: InkPalette.glow.withValues(alpha: 0.55),
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                ),
-              ]
-            : const <BoxShadow>[],
-      ),
-      child: Text(
-        '$face',
-        style: const TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w800,
-          color: InkPalette.paper,
-        ),
-      ),
-    );
+    return CoinGlyph(face: face, size: 72, glow: glow);
   }
 }
 
@@ -351,23 +326,6 @@ class _SmallCoin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 40,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: InkPalette.glow.withValues(alpha: 0.9),
-        border: Border.all(color: InkPalette.ink.withValues(alpha: 0.4)),
-      ),
-      child: Text(
-        '$face',
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
-          color: InkPalette.ink,
-        ),
-      ),
-    );
+    return CoinGlyph(face: face, size: 44);
   }
 }

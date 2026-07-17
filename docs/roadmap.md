@@ -72,8 +72,8 @@
 - [x] 第三步"找零"：1 / 2 / 5 面值点选累加，超额回弹 + 撤一枚 + chime
 - [x] 章末顺口溜页：新 `NumberPoemPage` 逐行呈现 + markPoemDone("numbers_isle")
 - [x] Home 页抽成通用 ChapterList（机关岛/故事岛以"敬请期待"卡就位）
-- [ ] 商品/贝币的水墨插图（v0 用色块 + 汉字兜底）
-- [ ] 童谣 TTS（v0 静默，字幕保留）
+- [x] 商品/贝币的水墨位图（Pillow 合成 · 5 商品 + 4 贝币）
+- [x] 童谣 TTS（Edge TTS Xiaoxiao rate -10% · 5 天 + 章末顺口溜）
 ## 后续版本（不排入 v1）
 
 - 会意 / 形声 / 指事三个子章节

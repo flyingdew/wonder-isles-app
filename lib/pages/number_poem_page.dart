@@ -24,6 +24,7 @@ class NumberPoemPage extends StatefulWidget {
     '五指连心，掌心生光。',
   ];
   static const String sceneKey = 'numbers_isle';
+  static const String voiceAsset = 'voice/num_boss.mp3';
 
   @override
   State<NumberPoemPage> createState() => _NumberPoemPageState();
@@ -48,6 +49,7 @@ class _NumberPoemPageState extends State<NumberPoemPage> {
 
   void _start() {
     context.read<VoiceService>().playSfx('page');
+    context.read<VoiceService>().play(NumberPoemPage.voiceAsset);
     _timer = Timer.periodic(const Duration(milliseconds: 900), (Timer t) async {
       if (!mounted) {
         t.cancel();

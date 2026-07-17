@@ -1,9 +1,4 @@
 /// 数之岛一条数字（对应 assets/data/numbers.json 的一行）。
-///
-/// v0 只覆盖 1-5，用于"云上小铺"经营场景：
-///   - 数一数：货架摆 [num] 件商品
-///   - 配一配：顾客要 [num] 件，孩子拖入箩筐
-///   - 找零：顾客给 [change.given]，商品价 [change.price]，差额 = given - price
 class NumberEntry {
   const NumberEntry({
     required this.id,
@@ -25,6 +20,9 @@ class NumberEntry {
   final String rhyme;
   final ChangeConfig change;
 
+  /// 童谣 TTS 资源（相对 assets/ 根，对应 audioplayers AssetSource）。
+  String get rhymeVoiceAsset => 'voice/num_$id.mp3';
+
   factory NumberEntry.fromJson(Map<String, dynamic> json) {
     return NumberEntry(
       id: json['id'] as String,
@@ -40,24 +38,31 @@ class NumberEntry {
   }
 }
 
-/// 商品的临时视觉描述。v0 用色块 + 单字标签兜底，
-/// W2 会替换为 assets/numbers/goods/<id>.png。
+/// 商品的视觉描述。
 class GoodStyle {
   const GoodStyle({
     required this.label,
     required this.name,
+    required this.asset,
     required this.colorKey,
   });
 
   final String label;
   final String name;
-  /// 对应 InkPalette 中的键：vermilion / ochre / reed / dusk / glow。
+  /// 位图资源 id，对应 assets/numbers/goods/<asset>.png。
+  final String asset;
+  /// 兜底色（水墨阴影/色块 dim 状态使用）。
+  /// 键：vermilion / ochre / reed / dusk / glow。
   final String colorKey;
+
+  /// 完整资源路径。
+  String get assetPath => 'assets/numbers/goods/$asset.png';
 
   factory GoodStyle.fromJson(Map<String, dynamic> json) {
     return GoodStyle(
       label: json['label'] as String,
       name: json['name'] as String,
+      asset: json['asset'] as String,
       colorKey: json['color'] as String,
     );
   }

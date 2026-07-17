@@ -181,6 +181,7 @@ class _DayCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               NumberGlyph(
+                assetPath: entry.good.assetPath,
                 label: entry.good.label,
                 colorKey: entry.good.colorKey,
                 size: 40,

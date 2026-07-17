@@ -26,3 +26,7 @@
 | page.mp3    | 诗行成句 / 翻页 | Freesound — "Page Turn" (id 136778) | CC0 1.0 |
 
 CC0 授权文本见 <https://creativecommons.org/publicdomain/zero/1.0/>，无需署名即可使用；本表保留出处仅为可追溯。
+## 数之岛童谣（W6）
+
+Edge TTS zh-CN-XiaoxiaoNeural rate=-10%，scripts/gen_numbers_tts.py 一次性生成
+um_one.mp3 .. num_five.mp3 + num_boss.mp3。

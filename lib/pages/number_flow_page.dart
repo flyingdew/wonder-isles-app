@@ -170,6 +170,7 @@ class _Celebration extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               NumberGlyph(
+                assetPath: entry.good.assetPath,
                 label: entry.good.label,
                 colorKey: entry.good.colorKey,
                 size: 44,
