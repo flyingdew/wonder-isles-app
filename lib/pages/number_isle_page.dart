@@ -8,6 +8,7 @@ import '../services/progress_store.dart';
 import '../services/voice_service.dart';
 import '../widgets/number_glyph.dart';
 import 'number_flow_page.dart';
+import 'number_poem_page.dart';
 
 /// 数之岛（第二章） · 云上小铺。
 ///
@@ -34,6 +35,10 @@ class _NumberIslePageState extends State<NumberIslePage> {
     final NumberRepository repo = context.read<NumberRepository>();
     final ProgressStore progress = context.watch<ProgressStore>();
     final List<NumberEntry> entries = repo.all;
+    final bool allDone =
+        entries.every((NumberEntry e) => progress.isNumberLit(e.id));
+    final bool poemDone =
+        progress.isPoemDone(NumberPoemPage.sceneKey);
 
     return Scaffold(
       appBar: AppBar(
@@ -61,9 +66,18 @@ class _NumberIslePageState extends State<NumberIslePage> {
             const SizedBox(height: 12),
           ],
           const SizedBox(height: 8),
-          _Progress(
+          _RhymeEntry(
             done: progress.numberLitCount,
             total: entries.length,
+            unlocked: allDone,
+            poemDone: poemDone,
+            onEnter: () async {
+              await Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (_) => const NumberPoemPage(),
+              ));
+              if (!mounted) return;
+              setState(() {});
+            },
           ),
         ],
       ),
@@ -210,30 +224,75 @@ class _DayBadge extends StatelessWidget {
   }
 }
 
-class _Progress extends StatelessWidget {
-  const _Progress({required this.done, required this.total});
+class _RhymeEntry extends StatelessWidget {
+  const _RhymeEntry({
+    required this.done,
+    required this.total,
+    required this.unlocked,
+    required this.poemDone,
+    required this.onEnter,
+  });
   final int done;
   final int total;
+  final bool unlocked;
+  final bool poemDone;
+  final VoidCallback onEnter;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: InkPalette.paperDeep,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: <Widget>[
-          const Icon(Icons.storefront_outlined,
-              color: InkPalette.vermilion),
-          const SizedBox(width: 8),
-          Text('小铺进度  $done / $total',
-              style: const TextStyle(
-                color: InkPalette.ink,
-                fontWeight: FontWeight.w600,
-              )),
-        ],
+    final Color bg = poemDone
+        ? InkPalette.glow.withValues(alpha: 0.9)
+        : (unlocked ? InkPalette.dusk : InkPalette.paperDeep);
+    final Color fg = poemDone ? InkPalette.ink : InkPalette.paper;
+    final Color fgDim = poemDone
+        ? InkPalette.inkSoft
+        : InkPalette.paper.withValues(alpha: 0.75);
+    final IconData icon = poemDone
+        ? Icons.auto_awesome
+        : (unlocked ? Icons.auto_stories : Icons.lock_outline);
+    final String label = poemDone
+        ? '重温顺口溜'
+        : (unlocked
+            ? '小铺关门 · 一起哼一段'
+            : '完成 5 天后开启（$done / $total）');
+    return Material(
+      color: bg,
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: unlocked ? onEnter : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Row(
+            children: <Widget>[
+              Icon(icon,
+                  color: unlocked ? fg : InkPalette.inkSoft, size: 26),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('章末顺口溜 · 一二三四五',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: unlocked ? fg : InkPalette.ink,
+                          letterSpacing: 2,
+                        )),
+                    const SizedBox(height: 4),
+                    Text(label,
+                        style: TextStyle(
+                          color: unlocked ? fgDim : InkPalette.inkSoft,
+                          fontSize: 13,
+                        )),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right,
+                  color: unlocked ? fg : InkPalette.inkSoft),
+            ],
+          ),
+        ),
       ),
     );
   }

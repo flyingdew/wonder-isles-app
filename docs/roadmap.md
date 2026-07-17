@@ -68,9 +68,9 @@
 - [x] 数据层：`assets/data/numbers.json`、`NumberEntry`、`NumberRepository`、`ProgressStore` 增补 `numberLit/numberVisits`
 - [x] 骨架：`NumberIslePage`（5 天顺序解锁）+ `NumberFlowPage`（三步）
 - [x] 第一步"数一数"：货架 N 件商品逐个点亮、累计计数、触发 SFX
-- [ ] 第二步"配一配"：拖拽 N 件到箩筐，数量校验 + 分层 haptic
-- [ ] 第三步"找零"：面值 1/2/5 贝币点选累加到差额
-- [ ] 章末顺口溜页复用 `PoemStagePage` 展示层
+- [x] 第二步"配一配"：Draggable / DragTarget，箩筐上限校验 + 分层 haptic + 拒收轻抖
+- [x] 第三步"找零"：1 / 2 / 5 面值点选累加，超额回弹 + 撤一枚 + chime
+- [x] 章末顺口溜页：新 `NumberPoemPage` 逐行呈现 + markPoemDone("numbers_isle")
 - [ ] Home 页把"章节列表"抽成通用 ChapterList（为机关岛/故事岛留位）
 - [ ] 商品/贝币的水墨插图（v0 用色块 + 汉字兜底）
 - [ ] 童谣 TTS（v0 静默，字幕保留）

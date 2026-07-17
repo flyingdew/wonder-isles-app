@@ -6,8 +6,9 @@ import '../data/number_entry.dart';
 import '../services/progress_store.dart';
 import '../services/voice_service.dart';
 import '../widgets/count_stage.dart';
+import '../widgets/make_stage.dart';
+import '../widgets/change_stage.dart';
 import '../widgets/number_glyph.dart';
-import '../widgets/number_todo_stage.dart';
 
 enum NumberFlowStep { count, make, change, done }
 
@@ -60,16 +61,13 @@ class _NumberFlowPageState extends State<NumberFlowPage> {
           onDone: () => setState(() => _step = NumberFlowStep.make),
         );
       case NumberFlowStep.make:
-        return NumberTodoStage(
-          title: '配一配 · 顾客要 ${e.value} 件${e.good.name}',
-          hint: '把货架上的 ${e.good.name} 拖进箩筐。',
+        return MakeStage(
+          entry: e,
           onDone: () => setState(() => _step = NumberFlowStep.change),
         );
       case NumberFlowStep.change:
-        return NumberTodoStage(
-          title: '找零 · 顾客给了 ${e.change.given} 贝币',
-          hint:
-              '${e.good.name}每个 1 贝币，一共 ${e.change.price} 贝币，找回 ${e.change.diff} 贝币。',
+        return ChangeStage(
+          entry: e,
           onDone: _onFinish,
         );
       case NumberFlowStep.done:
