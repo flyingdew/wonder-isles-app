@@ -59,6 +59,21 @@
 - [ ] 根据反馈调难度曲线、磁吸阈值、TTS 语速
 - [ ] 修 bug、优化冷启动与首屏
 
+## W6 · 数之岛 v0（原型开发中）
+
+第二章"数之岛 · 云上小铺"落地首个可玩原型。首版目标：把 1-5 的数感嵌到
+"小掌柜的一天"里，跑通一条闭环。
+
+- [x] 章节文档：`docs/chapter-02-数之岛.md`（5 天内容 + 章末顺口溜）
+- [x] 数据层：`assets/data/numbers.json`、`NumberEntry`、`NumberRepository`、`ProgressStore` 增补 `numberLit/numberVisits`
+- [x] 骨架：`NumberIslePage`（5 天顺序解锁）+ `NumberFlowPage`（三步）
+- [x] 第一步"数一数"：货架 N 件商品逐个点亮、累计计数、触发 SFX
+- [ ] 第二步"配一配"：拖拽 N 件到箩筐，数量校验 + 分层 haptic
+- [ ] 第三步"找零"：面值 1/2/5 贝币点选累加到差额
+- [ ] 章末顺口溜页复用 `PoemStagePage` 展示层
+- [ ] Home 页把"章节列表"抽成通用 ChapterList（为机关岛/故事岛留位）
+- [ ] 商品/贝币的水墨插图（v0 用色块 + 汉字兜底）
+- [ ] 童谣 TTS（v0 静默，字幕保留）
 ## 后续版本（不排入 v1）
 
 - 会意 / 形声 / 指事三个子章节

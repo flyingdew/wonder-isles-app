@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'app_theme.dart';
 import 'data/character_repository.dart';
+import 'data/number_repository.dart';
 import 'pages/home_page.dart';
 import 'services/progress_store.dart';
 import 'services/error_reporter.dart';
@@ -36,10 +37,12 @@ Future<void> _bootstrap() async {
   // 三个 load 之间只有 attachRepository 依赖 repository 就绪，其余互不依赖，
   // 并行加载可以显著缩短冷启动的白屏时间。
   final CharacterRepository repository = CharacterRepository();
+  final NumberRepository numberRepository = NumberRepository();
   final ProgressStore progress = ProgressStore();
   final VoiceService voice = VoiceService();
   await Future.wait(<Future<void>>[
     repository.load(),
+    numberRepository.load(),
     progress.load(),
     voice.load(),
   ]);
@@ -47,6 +50,7 @@ Future<void> _bootstrap() async {
 
   runApp(WonderIslesApp(
     repository: repository,
+    numberRepository: numberRepository,
     progress: progress,
     voice: voice,
   ));
@@ -56,11 +60,13 @@ class WonderIslesApp extends StatelessWidget {
   const WonderIslesApp({
     super.key,
     required this.repository,
+    required this.numberRepository,
     required this.progress,
     required this.voice,
   });
 
   final CharacterRepository repository;
+  final NumberRepository numberRepository;
   final ProgressStore progress;
   final VoiceService voice;
 
@@ -69,6 +75,7 @@ class WonderIslesApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<CharacterRepository>.value(value: repository),
+        Provider<NumberRepository>.value(value: numberRepository),
         ChangeNotifierProvider<ProgressStore>.value(value: progress),
         ChangeNotifierProvider<VoiceService>.value(value: voice),
       ],

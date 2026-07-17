@@ -13,6 +13,9 @@ class ProgressStore extends ChangeNotifier {
   static const String _kAchievements = 'wonder_isles.achievements';
   static const String _kLastVisit = 'wonder_isles.streak.lastVisit';
   static const String _kStreak = 'wonder_isles.streak.count';
+  // ---- 数之岛（第二章） ----
+  static const String _kNumLit = 'wonder_isles.numbers.lit';
+  static const String _kNumVisitPrefix = 'wonder_isles.numbers.visit.';
 
   final Set<String> _lit = <String>{};
   final Map<String, int> _visits = <String, int>{};
@@ -22,6 +25,8 @@ class ProgressStore extends ChangeNotifier {
   CharacterRepository? _repo;
   DateTime? _lastVisit;
   int _streak = 0;
+  final Set<String> _numLit = <String>{};
+  final Map<String, int> _numVisits = <String, int>{};
 
   Set<String> get litIds => Set<String>.unmodifiable(_lit);
   int get litCount => _lit.length;
@@ -29,6 +34,10 @@ class ProgressStore extends ChangeNotifier {
   Set<String> get unlockedAchievements =>
       Set<String>.unmodifiable(_achievements);
   int get streakDays => _streak;
+  Set<String> get numberLitIds => Set<String>.unmodifiable(_numLit);
+  int get numberLitCount => _numLit.length;
+  Map<String, int> get allNumberVisits =>
+      Map<String, int>.unmodifiable(_numVisits);
 
   Future<void> load() async {
     _prefs = await SharedPreferences.getInstance();
@@ -42,9 +51,16 @@ class ProgressStore extends ChangeNotifier {
       ..clear()
       ..addAll(_prefs?.getStringList(_kAchievements) ?? <String>[]);
     _visits.clear();
+    _numLit
+      ..clear()
+      ..addAll(_prefs?.getStringList(_kNumLit) ?? <String>[]);
+    _numVisits.clear();
     for (final String key in _prefs?.getKeys() ?? const <String>{}) {
       if (key.startsWith(_kVisitPrefix)) {
         _visits[key.substring(_kVisitPrefix.length)] =
+            _prefs?.getInt(key) ?? 0;
+      } else if (key.startsWith(_kNumVisitPrefix)) {
+        _numVisits[key.substring(_kNumVisitPrefix.length)] =
             _prefs?.getInt(key) ?? 0;
       }
     }
@@ -59,6 +75,8 @@ class ProgressStore extends ChangeNotifier {
   }
 
   bool isLit(String id) => _lit.contains(id);
+  bool isNumberLit(String id) => _numLit.contains(id);
+  int numberVisits(String id) => _numVisits[id] ?? 0;
   int visits(String id) => _visits[id] ?? 0;
   Map<String, int> get allVisits => Map<String, int>.unmodifiable(_visits);
   bool isPoemDone(String sceneKey) => _poems.contains(sceneKey);
@@ -74,6 +92,15 @@ class ProgressStore extends ChangeNotifier {
     return _evaluate();
   }
 
+  Future<List<Achievement>> markNumberLit(String id) async {
+    _numVisits[id] = (_numVisits[id] ?? 0) + 1;
+    await _prefs?.setInt('$_kNumVisitPrefix$id', _numVisits[id]!);
+    if (_numLit.add(id)) {
+      await _prefs?.setStringList(_kNumLit, _numLit.toList());
+    }
+    notifyListeners();
+    return _evaluate();
+  }
   Future<List<Achievement>> markPoemDone(String sceneKey) async {
     if (_poems.add(sceneKey)) {
       await _prefs?.setStringList(_kPoems, _poems.toList());
@@ -146,6 +173,8 @@ class ProgressStore extends ChangeNotifier {
   Future<void> reset() async {
     _lit.clear();
     _visits.clear();
+    _numLit.clear();
+    _numVisits.clear();
     _poems.clear();
     _achievements.clear();
     _lastVisit = null;

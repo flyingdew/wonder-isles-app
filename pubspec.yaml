@@ -36,6 +36,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/data/characters.json
+    - assets/data/numbers.json
     - assets/scenes/
     - assets/voice/
     - assets/bgm/

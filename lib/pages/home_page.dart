@@ -14,6 +14,7 @@ import '../widgets/achievement_dialog.dart';
 import '../widgets/app_version.dart';
 import '../widgets/update_dialog.dart';
 import 'island_map_page.dart';
+import 'number_isle_page.dart';
 import 'parent_dashboard_page.dart';
 import 'poem_stage_page.dart';
 
@@ -85,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(height: 6),
                           const Text(
-                            '第一章 · 字之岛 · 万物有形',
+                            '一片漂浮在云海上的群岛',
                             style: TextStyle(
                               fontSize: 16,
                               color: InkPalette.inkSoft,
@@ -96,27 +97,41 @@ class _HomePageState extends State<HomePage> {
                           if (!tight) const Spacer(),
                           _LitBadge(count: progress.litCount),
                           SizedBox(height: tight ? 14 : 20),
-                          Row(
-                            children: <Widget>[
-                              FilledButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(MaterialPageRoute<void>(
-                                    builder: (_) => const IslandMapPage(),
-                                  ));
-                                },
-                                child: const Text('登岛探字'),
+                          _ChapterCard(
+                            title: '第一章 · 字之岛',
+                            subtitle: '万物有形',
+                            icon: Icons.brush_outlined,
+                            accent: InkPalette.vermilion,
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute<void>(
+                                builder: (_) => const IslandMapPage(),
+                              ));
+                            },
+                          ),
+                          const SizedBox(height: 10),
+                          _ChapterCard(
+                            title: '第二章 · 数之岛',
+                            subtitle: '云上小铺 · 原型',
+                            icon: Icons.storefront_outlined,
+                            accent: InkPalette.ochre,
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute<void>(
+                                builder: (_) => const NumberIslePage(),
+                              ));
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton(
+                              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                                builder: (_) => const ParentDashboardPage(),
+                              )),
+                              style: TextButton.styleFrom(
+                                foregroundColor: InkPalette.inkSoft,
                               ),
-                              const SizedBox(width: 12),
-                              TextButton(
-                                onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                                  builder: (_) => const ParentDashboardPage(),
-                                )),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: InkPalette.inkSoft,
-                                ),
-                                child: const Text('家长'),
-                              ),
-                            ],
+                              child: const Text('家长'),
+                            ),
                           ),
                           if (kDebugMode && kIsWeb) ...<Widget>[
                             const SizedBox(height: 12),
@@ -141,6 +156,71 @@ class _HomePageState extends State<HomePage> {
 
 }
 
+class _ChapterCard extends StatelessWidget {
+  const _ChapterCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.accent,
+    required this.onTap,
+  });
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color accent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: InkPalette.paperDeep,
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: accent, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: InkPalette.ink,
+                          letterSpacing: 2,
+                        )),
+                    const SizedBox(height: 2),
+                    Text(subtitle,
+                        style: const TextStyle(
+                          color: InkPalette.inkSoft,
+                          letterSpacing: 1,
+                        )),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: InkPalette.inkSoft),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 class _LitBadge extends StatelessWidget {
   const _LitBadge({required this.count});
   final int count;
