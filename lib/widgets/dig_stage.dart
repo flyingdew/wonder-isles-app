@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show HapticFeedback, rootBundle;
 import 'package:provider/provider.dart';
 
 import '../app_theme.dart';
@@ -31,8 +31,12 @@ class _DigStageState extends State<DigStage> {
   Rect _imageRect = Rect.zero;
   bool _finished = false;
 
-  static const double _brushRadius = 34.0;
-  static const double _revealTargetRatio = 0.62;
+  double get _brushRadius {
+    final double side = _imageRect.shortestSide;
+    if (side <= 0) return 34.0;
+    return (side * 0.11).clamp(24.0, 44.0);
+  }
+  static const double _revealTargetRatio = 0.55;
   static const int _gridSide = 64;
   static const double _paperPad = 32;
 
@@ -157,6 +161,7 @@ class _DigStageState extends State<DigStage> {
     });
     if (!_finished && _revealedRatio >= _revealTargetRatio) {
       _finished = true;
+      HapticFeedback.mediumImpact();
       context.read<VoiceService>().playSfx('sparkle');
       Future<void>.delayed(const Duration(milliseconds: 250), widget.onDone);
     }

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:provider/provider.dart';
 
 import '../app_theme.dart';
@@ -177,7 +178,7 @@ class _AssembleStageState extends State<AssembleStage> {
     final Offset slotCenter = _slotTopLeft(nearest) +
         Offset(_pieceSideSnap / 2, _pieceSideSnap / 2);
     final double d = (center - slotCenter).distance;
-    final int? next = d < _pieceSideSnap * 0.75 ? nearest : null;
+    final int? next = d < _pieceSideSnap * 0.90 ? nearest : null;
     setState(() {
       _piecePos[pieceId] = _clampToCanvas(pos);
       _hoveredSlot = next;
@@ -191,7 +192,7 @@ class _AssembleStageState extends State<AssembleStage> {
     final Offset slotCenter = _slotTopLeft(nearest) +
         Offset(_pieceSideSnap / 2, _pieceSideSnap / 2);
     final double d = (center - slotCenter).distance;
-    final bool inRange = d < _pieceSideSnap * 0.55;
+    final bool inRange = d < _pieceSideSnap * 0.65;
     final bool slotFree = _slotOwner[nearest] == null ||
         _slotOwner[nearest] == pieceId;
     final bool matches = nearest == pieceId;
@@ -211,7 +212,10 @@ class _AssembleStageState extends State<AssembleStage> {
       }
     });
     if (snapNow) {
+      HapticFeedback.selectionClick();
       context.read<VoiceService>().playSfx('snap');
+    } else {
+      HapticFeedback.lightImpact();
     }
 
     if (!(inRange && slotFree && matches)) {
@@ -224,6 +228,7 @@ class _AssembleStageState extends State<AssembleStage> {
     }
 
     if (_finished) {
+      HapticFeedback.mediumImpact();
       context.read<VoiceService>().playSfx('sparkle');
       Future<void>.delayed(const Duration(milliseconds: 420), widget.onDone);
     }
