@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -183,7 +184,7 @@ class _AboutCardState extends State<AboutCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              if (ErrorReporter.enabled)
+              if (kDebugMode && ErrorReporter.enabled)
                 TextButton.icon(
                   onPressed: _busy ? null : _handleSentryTest,
                   icon: const Icon(Icons.bug_report_outlined, size: 18),
