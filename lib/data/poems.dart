@@ -30,6 +30,9 @@ class ScenePoem {
   final String title;
   final List<PoemLine> lines;
 
+  /// TTS 音频资源（相对 assets/ 根），文件名与 sceneKey 对齐。
+  String get voiceAsset => 'voice/poem_$sceneKey.mp3';
+
   List<String> get slotCharIds => <String>[
         for (final PoemLine l in lines)
           for (final PoemToken t in l.tokens)

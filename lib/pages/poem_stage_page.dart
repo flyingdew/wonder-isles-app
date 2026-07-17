@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -38,6 +39,17 @@ class _PoemStagePageState extends State<PoemStagePage>
 
   final Map<int, String> _placed = <int, String>{};
   int? _shakeSlot;
+
+  // 诗行朗读 + 高亮状态。
+  late final List<String> _lineTexts = <String>[];
+  int _totalChars = 0;
+  int _activeLine = -1;
+  bool _reading = false;
+  Duration _ttsDuration = Duration.zero;
+  StreamSubscription<Duration>? _posSub;
+  StreamSubscription<Duration>? _durSub;
+  StreamSubscription<void>? _completeSub;
+
   late final AnimationController _celebrateCtrl = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1400),
@@ -51,12 +63,81 @@ class _PoemStagePageState extends State<PoemStagePage>
     _bankOrder = _slotIds.toSet().toList()..shuffle(rng);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final CharacterRepository repo =
+          context.read<CharacterRepository>();
+      final List<String> texts = _renderLineTexts(repo);
+      setState(() {
+        _lineTexts
+          ..clear()
+          ..addAll(texts);
+        _totalChars =
+            _lineTexts.fold<int>(0, (int a, String s) => a + s.length);
+      });
       context.read<VoiceService>().playBgmForScene(_poem.sceneKey);
     });
   }
 
+  List<String> _renderLineTexts(CharacterRepository repo) {
+    return <String>[
+      for (final PoemLine line in _poem.lines)
+        line.tokens.map((PoemToken t) {
+          if (t.isSlot) return repo.byId(t.slotCharId!).char;
+          return t.text;
+        }).join(),
+    ];
+  }
+
+  Future<void> _startReading() async {
+    if (_lineTexts.isEmpty) return;
+    final VoiceService voice = context.read<VoiceService>();
+    _posSub?.cancel();
+    _durSub?.cancel();
+    _completeSub?.cancel();
+    setState(() {
+      _reading = true;
+      _activeLine = 0;
+      _ttsDuration = Duration.zero;
+    });
+    _durSub = voice.onTtsDuration.listen((Duration d) {
+      if (!mounted) return;
+      if (d.inMilliseconds > 0 && d != _ttsDuration) {
+        setState(() => _ttsDuration = d);
+      }
+    });
+    _posSub = voice.onTtsPosition.listen(_handlePosition);
+    _completeSub = voice.onTtsComplete.listen((_) {
+      if (!mounted) return;
+      setState(() {
+        _reading = false;
+        _activeLine = -1;
+      });
+    });
+    unawaited(voice.play(_poem.voiceAsset));
+  }
+
+  void _handlePosition(Duration pos) {
+    if (!mounted) return;
+    if (_ttsDuration.inMilliseconds <= 0 || _totalChars <= 0) return;
+    final double frac = pos.inMilliseconds / _ttsDuration.inMilliseconds;
+    int cum = 0;
+    int idx = _lineTexts.length - 1;
+    for (int i = 0; i < _lineTexts.length; i++) {
+      cum += _lineTexts[i].length;
+      if (frac <= cum / _totalChars) {
+        idx = i;
+        break;
+      }
+    }
+    if (idx != _activeLine) {
+      setState(() => _activeLine = idx);
+    }
+  }
+
   @override
   void dispose() {
+    _posSub?.cancel();
+    _durSub?.cancel();
+    _completeSub?.cancel();
     _celebrateCtrl.dispose();
     super.dispose();
   }
@@ -90,6 +171,10 @@ class _PoemStagePageState extends State<PoemStagePage>
             .read<ProgressStore>()
             .markPoemDone(_poem.sceneKey);
         if (!mounted) return;
+        // 停掉 BGM 让 TTS 逐句朗读更清亮。
+        await context.read<VoiceService>().stopBgm();
+        if (!mounted) return;
+        unawaited(_startReading());
         await showAchievementUnlocked(context, unlocked);
       });
     }
@@ -103,7 +188,17 @@ class _PoemStagePageState extends State<PoemStagePage>
     final bool isBoss = _poem.scene == null;
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(title: Text(_poem.title)),
+      appBar: AppBar(
+        title: Text(_poem.title),
+        actions: <Widget>[
+          if (_finished)
+            IconButton(
+              tooltip: '再念一遍',
+              onPressed: _reading ? null : _startReading,
+              icon: const Icon(Icons.record_voice_over_outlined),
+            ),
+        ],
+      ),
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
@@ -140,6 +235,7 @@ class _PoemStagePageState extends State<PoemStagePage>
                           shakeSlot: _shakeSlot,
                           celebrate: _celebrateCtrl,
                           onDropped: _onDropped,
+                          activeLine: _activeLine,
                           compact: isBoss,
                         ),
                       ),
@@ -277,6 +373,7 @@ class _PoemBoard extends StatelessWidget {
     required this.shakeSlot,
     required this.celebrate,
     required this.onDropped,
+    this.activeLine = -1,
     this.compact = false,
   });
 
@@ -287,6 +384,7 @@ class _PoemBoard extends StatelessWidget {
   final int? shakeSlot;
   final Animation<double> celebrate;
   final void Function(int slotIndex, String charId) onDropped;
+  final int activeLine;
   final bool compact;
 
   @override
@@ -304,22 +402,34 @@ class _PoemBoard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          for (final PoemLine line in poem.lines)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: compact ? 3 : 6),
+          for (int li = 0; li < poem.lines.length; li++)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOut,
+              margin: EdgeInsets.symmetric(vertical: compact ? 2 : 4),
+              padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 8 : 12,
+                  vertical: compact ? 3 : 5),
+              decoration: BoxDecoration(
+                color: li == activeLine
+                    ? InkPalette.glow.withValues(alpha: 0.35)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Wrap(
                 alignment: WrapAlignment.center,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 2,
                 runSpacing: 4,
                 children: <Widget>[
-                  for (final PoemToken t in line.tokens)
+                  for (final PoemToken t in poem.lines[li].tokens)
                     if (t.isSlot)
                       _buildSlot(context, slotCounter++)
                     else
                       _StaticGlyph(
                           text: t.text,
                           celebrate: celebrate,
+                          active: li == activeLine,
                           compact: compact),
                 ],
               ),
@@ -365,10 +475,12 @@ class _StaticGlyph extends StatelessWidget {
   const _StaticGlyph({
     required this.text,
     required this.celebrate,
+    this.active = false,
     this.compact = false,
   });
   final String text;
   final Animation<double> celebrate;
+  final bool active;
   final bool compact;
 
   @override
@@ -377,6 +489,8 @@ class _StaticGlyph extends StatelessWidget {
       animation: celebrate,
       builder: (BuildContext ctx, _) {
         final double t = celebrate.value;
+        final Color base = Color.lerp(
+            InkPalette.ink, InkPalette.vermilion, t * 0.6)!;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
           child: Text(
@@ -384,9 +498,8 @@ class _StaticGlyph extends StatelessWidget {
             style: TextStyle(
               fontSize: compact ? 18 : 22,
               height: 1.4,
-              color:
-                  Color.lerp(InkPalette.ink, InkPalette.vermilion, t * 0.6)!,
-              fontWeight: FontWeight.w500,
+              color: active ? InkPalette.ink : base,
+              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
         );
