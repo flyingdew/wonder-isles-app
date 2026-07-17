@@ -1,7 +1,7 @@
 name: wonder_isles
 description: "奇思岛 · 字之岛 — 面向 6-8 岁孩子的汉字考古学习游戏 (Flutter 版)。"
 publish_to: "none"
-version: 0.1.8+8
+version: 0.1.9+9
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
