@@ -454,8 +454,9 @@ class _DigSpot extends StatelessWidget {
               child: InkWell(
                 onTap: onTap,
                 child: Padding(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.fromLTRB(10, 4, 10, 4),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       _GlyphOrMound(
@@ -464,7 +465,7 @@ class _DigSpot extends StatelessWidget {
                         reveal: justLit ? t : (lit ? 1.0 : 0.0),
                         accent: accent,
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
                         lit ? character.pinyin : '土堆',
                         style: TextStyle(

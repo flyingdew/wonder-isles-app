@@ -70,8 +70,7 @@ class _HomePageState extends State<HomePage> {
                 physics: const ClampingScrollPhysics(),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: cons.maxHeight),
-                  child: IntrinsicHeight(
-                    child: Padding(
+                  child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 28, vertical: vPad),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,11 +109,11 @@ class _HomePageState extends State<HomePage> {
                             ChapterEntry(
                               title: '第一章 · 字之岛',
                               subtitle: '万物有形',
-                              emoji: '🖉',
+                              emoji: '✏️',
                               icon: Icons.brush_outlined,
                               accent: InkPalette.vermilion,
                               status: ChapterStatus.playable,
-                              badge: '点亮 ${progress.litCount} / 20',
+                              badge: '点亮 ${progress.litCount}/20',
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute<void>(
                                   builder: (_) => const IslandMapPage(),
@@ -135,8 +134,8 @@ class _HomePageState extends State<HomePage> {
                                       progress.isPoemDone('numbers_isle'))
                                   ? '🎉 圆满'
                                   : (progress.numberLitCount > 0
-                                      ? '🎉 开张 ${progress.numberLitCount} / 5'
-                                      : '原型'),
+                                      ? '🎉 开张 ${progress.numberLitCount}/5'
+                                      : '开张 ${progress.numberLitCount}/5'),
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute<void>(
                                   builder: (_) => const NumberIslePage(),
@@ -160,36 +159,6 @@ class _HomePageState extends State<HomePage> {
                               status: ChapterStatus.comingSoon,
                             ),
                           ]),
-                          const SizedBox(height: 12),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Material(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(999),
-                              child: InkWell(
-                                onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                                  builder: (_) => const ParentDashboardPage(),
-                                )),
-                                borderRadius: BorderRadius.circular(999),
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      Text('🀄', style: TextStyle(fontSize: 16)),
-                                      SizedBox(width: 6),
-                                      Text('家长',
-                                          style: TextStyle(
-                                            color: InkPalette.inkSoft,
-                                            fontWeight: FontWeight.w600,
-                                            letterSpacing: 1,
-                                          )),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
                           if (kDebugMode && kIsWeb) ...<Widget>[
                             const SizedBox(height: 12),
                             const _DebugShortcuts(),
@@ -197,12 +166,32 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(height: 24),
                           // 底部一行小字版本号，家长按需一眼看到，孩子基本忽略
                           const Center(child: AppVersionLabel()),
+                          const SizedBox(height: 8),
+                          Center(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: InkPalette.inkSoft,
+                                textStyle: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                              ),
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const ParentDashboardPage(),
+                                ),
+                              ),
+                              child: const Text('家长'),
+                            ),
+                          ),
                           const SizedBox(height: 12),
                         ],
                       ),
                     ),
                   ),
-                ),
               );
             }),
           ),

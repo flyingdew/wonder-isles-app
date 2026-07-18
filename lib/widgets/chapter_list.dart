@@ -104,15 +104,18 @@ class _ChapterCard extends StatelessWidget {
                     children: <Widget>[
                       Row(
                         children: <Widget>[
-                          Flexible(
+                          Expanded(
                             child: Text(entry.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                softWrap: false,
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.w700,
                                   color: enabled
                                       ? InkPalette.ink
                                       : InkPalette.inkSoft,
-                                  letterSpacing: 1.5,
+                                  letterSpacing: 0.5,
                                 )),
                           ),
                           const SizedBox(width: 8),
@@ -187,19 +190,28 @@ class _StatusBadge extends StatelessWidget {
         bg = InkPalette.inkSoft.withValues(alpha: 0.10);
         break;
     }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
+    // 所有章节徽章保持统一宽度，文字居中，避免不同文字挤窄标题.
+    return SizedBox(
+      width: 72,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            softWrap: false,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: fg,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.3,
+            )),
       ),
-      child: Text(text,
-          style: TextStyle(
-            color: fg,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-          )),
     );
   }
 }

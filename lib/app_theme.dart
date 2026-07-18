@@ -23,10 +23,15 @@ ThemeData buildWonderIslesTheme() {
     surface: InkPalette.paper,
   );
 
-  final TextTheme text = ThemeData.light().textTheme.apply(
+  final TextTheme baseText = ThemeData.light().textTheme.apply(
         bodyColor: InkPalette.ink,
         displayColor: InkPalette.ink,
       );
+  // 本地打包的 Noto COLRv1 彩色 emoji 作为所有文本的 fallback，避免 Flutter Web 走 Google Noto
+  // 网络备用字体，同时保证 ⛰ / ✏️ 等组成 emoji 能正常渲染。
+  // Roboto 拉丁文 / NotoSansSC 覆盖简中 / NotoColorEmoji 覆盖 emoji，为全部文本挂 fallback，避免 Flutter Web 走 fonts.gstatic.*。
+  const List<String> emojiFallback = <String>['NotoSansSC', 'NotoColorEmoji'];
+  final TextTheme text = baseText.apply(fontFamilyFallback: emojiFallback);
 
   return ThemeData(
     colorScheme: scheme,
