@@ -103,19 +103,20 @@ class _ChapterCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           Expanded(
                             child: Text(entry.title,
                                 maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                overflow: TextOverflow.visible,
                                 softWrap: false,
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w700,
                                   color: enabled
                                       ? InkPalette.ink
                                       : InkPalette.inkSoft,
-                                  letterSpacing: 0.5,
+                                  letterSpacing: 0,
                                 )),
                           ),
                           const SizedBox(width: 8),
@@ -190,28 +191,24 @@ class _StatusBadge extends StatelessWidget {
         bg = InkPalette.inkSoft.withValues(alpha: 0.10);
         break;
     }
-    // 所有章节徽章保持统一宽度，文字居中，避免不同文字挤窄标题.
-    return SizedBox(
-      width: 72,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Text(text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            softWrap: false,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: fg,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.3,
-            )),
+    // 徽章宽度随内容自适应，避免固定宽度挤压标题或截断多字文案。
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
       ),
+      child: Text(text,
+          maxLines: 1,
+          softWrap: false,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: fg,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.3,
+          )),
     );
   }
 }
