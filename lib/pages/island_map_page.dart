@@ -138,21 +138,27 @@ class _Header extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             _RoundIconBtn(icon: Icons.arrow_back_ios_new, onTap: onBack),
             const SizedBox(width: 12),
             const Expanded(
-              child: Text(
-                '字之岛 · 万物有形',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  color: InkPalette.ink,
-                  letterSpacing: 3,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '字之岛 · 万物有形',
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    color: InkPalette.ink,
+                    letterSpacing: 1,
+                  ),
                 ),
               ),
             ),
-            const Text('🖉', style: TextStyle(fontSize: 26)),
           ],
         ),
         const SizedBox(height: 6),

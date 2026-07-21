@@ -311,7 +311,7 @@ class _PoemEntry extends StatelessWidget {
       return _PoemCardLocked();
     }
     final String label = poemDone ? '重读今日小诗' : '题一首小诗';
-    final String emoji = poemDone ? '🎵' : '🖉';
+    final String emoji = poemDone ? '🎵' : '✏️';
     final Color bg = poemDone ? const Color(0xFFF2C56A) : accent;
     return Material(
       color: bg,
