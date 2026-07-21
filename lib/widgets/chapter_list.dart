@@ -102,31 +102,16 @@ class _ChapterCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(entry.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.visible,
-                                softWrap: false,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: enabled
-                                      ? InkPalette.ink
-                                      : InkPalette.inkSoft,
-                                  letterSpacing: 0,
-                                )),
-                          ),
-                          const SizedBox(width: 8),
-                          _StatusBadge(
-                            text: entry.badge ?? _defaultBadge(entry.status),
-                            status: entry.status,
-                            accent: entry.accent,
-                          ),
-                        ],
-                      ),
+                      Text(entry.title,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: enabled
+                                ? InkPalette.ink
+                                : InkPalette.inkSoft,
+                            letterSpacing: 0,
+                          )),
                       const SizedBox(height: 4),
                       Text(entry.subtitle,
                           style: TextStyle(
@@ -135,6 +120,16 @@ class _ChapterCard extends StatelessWidget {
                                 .withValues(alpha: enabled ? 0.9 : 0.6),
                             letterSpacing: 0.6,
                           )),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          _StatusBadge(
+                            text: entry.badge ?? _defaultBadge(entry.status),
+                            status: entry.status,
+                            accent: entry.accent,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

@@ -43,17 +43,19 @@ class _NumberIslePageState extends State<NumberIslePage> {
         progress.isPoemDone(NumberPoemPage.sceneKey);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: InkPalette.paper,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         title: const Text('数之岛 · 云上小铺',
             style: TextStyle(fontWeight: FontWeight.w600)),
+        backgroundColor: InkPalette.paper,
       ),
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
           const _ShopBackdrop(),
           ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
         children: <Widget>[
           const _Intro(),
           const SizedBox(height: 12),
